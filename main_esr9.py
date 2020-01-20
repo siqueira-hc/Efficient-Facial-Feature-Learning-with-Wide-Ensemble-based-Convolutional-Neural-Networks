@@ -19,7 +19,7 @@ from model.utils import uimage
 from model.screen.fer_demo import FERDemo
 
 
-def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fps, branch, no_plot):
+def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot):
     """
     This method receives images from a camera and recognizes
     facial expressions of the closets face in a frame-based approach.
@@ -32,7 +32,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fp
     :param output_csv_file:
     :param screen_size:
     :param device:
-    :param fps:
+    :param frames:
     :param branch:
     :return:
     """
@@ -43,7 +43,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fp
                            "\nCheck whether a webcam is working or not." +
                            "In linux, you can use Cheese for testing.")
 
-    uimage.set_fps(fps)
+    uimage.set_fps(frames)
 
     # Initialize screen
     if display:
@@ -109,7 +109,7 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
         fer_demo.quit()
 
 
-def video(input_video_path, display, gradcam, output_csv_file, screen_size, device, fps, branch, no_plot):
+def video(input_video_path, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot):
     """
     This method receives the full path to a video file and recognizes
     facial expressions of the closets face in a frame-based approach.
@@ -122,7 +122,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
     :param output_csv_file:
     :param screen_size:
     :param device:
-    :param fps:
+    :param frames:
     :param branch:
     :return:
     """
@@ -133,7 +133,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
                            "\nCheck whether working versions of ffmpeg or gstreamer is installed." +
                            "\nSupported file format: MPEG-4 (*.mp4).")
 
-    uimage.set_fps(fps)
+    uimage.set_fps(frames)
 
     # Initialize screen
     if display:
@@ -187,7 +187,7 @@ def main():
                         help="defines the webcam by 'id' to capture images in the webcam mode." +
                              "If none is selected, the default camera by the OS is used.",
                         type=int, default=-1)
-    parser.add_argument("-f", "--fps", help="defines fps of videos and webcam captures.",
+    parser.add_argument("-f", "--frames", help="defines frames of videos and webcam captures.",
                         type=int, default=5)
     parser.add_argument("-b", "--branch", help="shows individual branch's classification if set true, otherwise," +
                                                "shows final ensemble's classification.",
@@ -208,13 +208,13 @@ def main():
     elif args.mode == "video":
         try:
             cvalidation.validate_image_video_mode_arguments(args)
-            video(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.fps, args.branch, args.no_plot)
+            video(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot)
         except RuntimeError as e:
             print(e)
     elif args.mode == "webcam":
         try:
             cvalidation.validate_webcam_mode_arguments(args)
-            webcam(args.webcam_id, args.display, args.gradcam, args.output, args.size, args.cuda, args.fps, args.branch, args.no_plot)
+            webcam(args.webcam_id, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot)
         except RuntimeError as e:
             print(e)
 
