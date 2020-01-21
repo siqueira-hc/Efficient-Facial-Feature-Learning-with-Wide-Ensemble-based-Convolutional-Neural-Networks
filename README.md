@@ -9,6 +9,9 @@ This repository contains:
 - Our AAAI-2020 paper.
 
 # Facial Expression Recognition Framework
+![Example of the output of the framework in the video mode without a plot](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/terminator.gif)
+
+
 The facial expression recognition framework can be started by running **main_esr9.py** followed by positional and optional arguments.
 
 ## Getting Started
