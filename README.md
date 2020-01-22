@@ -158,7 +158,6 @@ _**[On development]**_
 # Acknowledgements
 This work has received funding from the European Union's Horizon 2020 research and innovation program under the Marie Skłodowska-Curie grant agreement No. 721619 for the SOCRATES project.
 
-<div>
-    <img src="https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png" width="50%">
-    <!--![Images of the EU flag and SOCRATES project](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png)--> 
-</div>
+<img src="https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png" style="display:block;margin-left:auto;margin-right:auto;width: 50%;"/>
+
+<!--![Images of the EU flag and SOCRATES project](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png)--> 
