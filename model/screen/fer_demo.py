@@ -22,7 +22,6 @@ class FERDemo:
     """
     This class implements the GUI of the facial expression recognition (FER) demo.
     """
-
     # Default values
     _DEFAULT_SCREEN_SIZE_ID = 1
     _DEFAULT_WINDOW_NAME = "Siqueira_et_al_AAAI_2020"
