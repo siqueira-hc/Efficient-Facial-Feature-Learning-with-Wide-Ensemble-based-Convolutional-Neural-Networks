@@ -90,7 +90,7 @@ class BranchCategorical(nn.Module):
         return x_branch
 
     def set_mask(self, mask_grad):
-        self.mask = nn.functional.interpolate(mask_grad, scale_factor=3, mode='bilinear', align_corners=True)
+        self.mask = nn.functional.interpolate(mask_grad, scale_factor=3, mode="bilinear", align_corners=True)
 
     def forward_to_last_conv_layer(self, x_forward_to_last_conv_layer):
         x_grad_to = F.relu(self.bn1(self.conv1(x_forward_to_last_conv_layer)))
@@ -163,7 +163,7 @@ class Branch(nn.Module):
         return emo, x_branch
 
     def set_mask(self, mask_grad):
-        self.mask = nn.functional.interpolate(mask_grad, scale_factor=3, mode='bilinear', align_corners=True)
+        self.mask = nn.functional.interpolate(mask_grad, scale_factor=3, mode="bilinear", align_corners=True)
 
     def forward_to_last_conv_layer(self, x_forward_to_last_conv_layer):
         x_grad_to = F.relu(self.bn1(self.conv1(x_forward_to_last_conv_layer)))
@@ -222,17 +222,17 @@ class Ensemble(nn.Module):
 
     @staticmethod
     def save(state_dicts, base_path_to_save_model, is_branch):
-        token = 'B-' if is_branch else ''
+        token = "B-" if is_branch else ""
 
         if not path.isdir(path.join(base_path_to_save_model, str(len(state_dicts) - 1))):
             makedirs(path.join(base_path_to_save_model, str(len(state_dicts) - 1)))
 
-        torch.save(state_dicts[0], path.join(base_path_to_save_model, str(len(state_dicts) - 1), '{}Net-Base-Shared_Representations.pkl'.format(token)))
+        torch.save(state_dicts[0], path.join(base_path_to_save_model, str(len(state_dicts) - 1), "{}Net-Base-Shared_Representations.pkl".format(token)))
 
         for i in range(1, len(state_dicts)):
-            torch.save(state_dicts[i], path.join(base_path_to_save_model, str(len(state_dicts) - 1), '{}Net-Branch_{}.pkl'.format(token, i)))
+            torch.save(state_dicts[i], path.join(base_path_to_save_model, str(len(state_dicts) - 1), "{}Net-Branch_{}.pkl".format(token, i)))
 
-        print('Network has been successfully saved at: {}'.format(path.join(base_path_to_save_model, str(len(state_dicts) - 1))))
+        print("Network has been successfully saved at: {}".format(path.join(base_path_to_save_model, str(len(state_dicts) - 1))))
 
     @staticmethod
     def load(device):
@@ -242,17 +242,15 @@ class Ensemble(nn.Module):
 
         # Load Base
         loaded_model_base = Base()
-        loaded_model_base.load_state_dict(torch.load(path.join('./model/esr/trained_models/esr_9', 'Net-Base-Shared_Representations.pkl'), map_location=device))
+        loaded_model_base.load_state_dict(torch.load(path.join("./model/esr/trained_models/esr_9", "Net-Base-Shared_Representations.pkl"), map_location=device))
         loaded_model.base = loaded_model_base
 
         # Load Branches
         for i in range(1, ensemble_size + 1):
             loaded_model_branch = Branch()
-            loaded_model_branch.load_state_dict(torch.load(path.join('./model/esr/trained_models/esr_9', 'Net-Branch_{}.pkl'.format(i)), map_location=device))
+            loaded_model_branch.load_state_dict(torch.load(path.join("./model/esr/trained_models/esr_9", "Net-Branch_{}.pkl".format(i)), map_location=device))
 
             loaded_model.branches.append(loaded_model_branch)
-
-        # print('Network has been successfully loaded')
 
         return loaded_model
 
@@ -265,7 +263,7 @@ class Ensemble(nn.Module):
         return state_dicts
 
     # TODO: model = nn.DataParallel(model)
-    def to_device(self, device_to_process='cpu'):
+    def to_device(self, device_to_process="cpu"):
         self.to(device_to_process)
         self.base.to(device_to_process)
 

@@ -17,7 +17,7 @@ def is_none(x):
     :param x: (string)
     :return: (bool)
     """
-    if (x is None) or ((type(x) == str) and (x.strip() == '')):
+    if (x is None) or ((type(x) == str) and (x.strip() == "")):
         return True
     else:
         return False

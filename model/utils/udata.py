@@ -21,13 +21,13 @@ class AffectNetCategorical(Dataset):
     @staticmethod
     def get_class(idx):
         classes = {
-            0: 'Neutral',
-            1: 'Happy',
-            2: 'Sad',
-            3: 'Surprise',
-            4: 'Fear',
-            5: 'Disgust',
-            6: 'Anger',
-            7: 'Contempt'}
+            0: "Neutral",
+            1: "Happy",
+            2: "Sad",
+            3: "Surprise",
+            4: "Fear",
+            5: "Disgust",
+            6: "Anger",
+            7: "Contempt"}
 
         return classes[idx]

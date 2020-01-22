@@ -68,7 +68,7 @@ def recognize_facial_expression(image, on_gpu):
         face = image[face_coordinates[0][1]:face_coordinates[1][1], face_coordinates[0][0]:face_coordinates[1][0], :]
 
         # Get device
-        device = torch.device('cuda' if on_gpu else 'cpu')
+        device = torch.device("cuda" if on_gpu else "cpu")
 
         # Pre_process detected face
         input_face = _pre_process_input_image(face)
@@ -106,7 +106,7 @@ def _haar_cascade(image, scale_factor=_SCALE_FACTOR, min_neighbors=_MIN_NEIGHBOR
 
     # Verify if haar cascade is initialized
     if _FACE_DETECTOR_HAAR_CASCADE is None:
-        _FACE_DETECTOR_HAAR_CASCADE = cv2.CascadeClassifier('./model/utils/templates/haar_cascade/frontal_face.xml')
+        _FACE_DETECTOR_HAAR_CASCADE = cv2.CascadeClassifier("./model/utils/templates/haar_cascade/frontal_face.xml")
 
     closest_face_area = 0
     face_coordinates = None
