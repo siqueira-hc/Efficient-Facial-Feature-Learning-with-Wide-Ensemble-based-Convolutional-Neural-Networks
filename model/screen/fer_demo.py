@@ -402,6 +402,7 @@ class FERDemo:
             # Brightness
             mean = np.mean(self._background)
             gamma = 0.75 if mean > 100 else 1.5
+            mean = mean if mean > 50 else 100
             self._background = np.clip((gamma * self._background) + mean, 0, 255).astype(np.uint8)
 
     def _get_container(self, x, y, h, w):

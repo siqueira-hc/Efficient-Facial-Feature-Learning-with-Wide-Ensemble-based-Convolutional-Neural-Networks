@@ -8,6 +8,10 @@ This repository contains:
 - Scripts of experiments conducted for the AAAI-2020 conference;
 - [Our AAAI-2020 paper](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020.pdf).
 
+#### Updates
+- Currently improving face detection algorithm;
+- The option to run facial expression recognition on GPU is now available. 
+
 # Facial Expression Recognition Framework
 ![Example of the output of the framework in the video mode without a plot](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/terminator.gif)
 
@@ -118,8 +122,13 @@ Optional arguments:
 	- Shows individual branch's classification.
 - **-np (--no_plot)**:
 	- Hides the graph of activation and (un)pleasant values.
-- **-c (--cuda)**:
+- **-fd (--face_detection)**:
 	- _**[On development]**_
+	- Defines the face detection algorithm:
+	    - Haar Feature-based Cascade Classifiers (Viola and Jones, 2004);
+	    - _Other methods will be added soon._
+	- _Warning: the chosen algorithm may affect performance._
+- **-c (--cuda)**:
 	- Runs facial expression recognition on GPU.
 - **-w (--webcam)**:
 	-  Defines the webcam to be used while the framework is running by 'id' when the webcam mode is selected. The default camera is used, if 'id' is not specified.
@@ -158,6 +167,4 @@ _**[On development]**_
 # Acknowledgements
 This work has received funding from the European Union's Horizon 2020 research and innovation program under the Marie Skłodowska-Curie grant agreement No. 721619 for the SOCRATES project.
 
-<img src="https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png" style="display:block;margin-left:auto;margin-right:auto;width: 50%;"/>
-
-<!--![Images of the EU flag and SOCRATES project](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png)--> 
+![Images of the EU flag and SOCRATES project](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/logo.png) 

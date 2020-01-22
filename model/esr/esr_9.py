@@ -238,12 +238,14 @@ class Ensemble(nn.Module):
     def load(device):
         ensemble_size = 9
         loaded_model = Ensemble()
+        loaded_model.to(device)
         loaded_model.branches = []
 
         # Load Base
         loaded_model_base = Base()
         loaded_model_base.load_state_dict(torch.load(path.join("./model/esr/trained_models/esr_9", "Net-Base-Shared_Representations.pkl"), map_location=device))
         loaded_model.base = loaded_model_base
+        loaded_model.base.to(device)
 
         # Load Branches
         for i in range(1, ensemble_size + 1):
@@ -251,6 +253,7 @@ class Ensemble(nn.Module):
             loaded_model_branch.load_state_dict(torch.load(path.join("./model/esr/trained_models/esr_9", "Net-Branch_{}.pkl".format(i)), map_location=device))
 
             loaded_model.branches.append(loaded_model_branch)
+            loaded_model.branches[-1].to(device)
 
         return loaded_model
 
