@@ -10,3 +10,4 @@ python-dateutil==2.8.1
 six==1.14.0
 torch==1.0.0
 torchvision==0.2.1
+dlib==19.19.0
