@@ -24,23 +24,11 @@ from model.utils import uimage, udata
 from model.esr.esr_9 import Ensemble
 
 
-# Haar-cascade Fast, Slow, Very-Slow
-
 # Private default values
-_SCALE_FACTORS = (10.0, 1.3)
-_INITIAL_NEIGHBORS = (205, 35)
-_DECREMENT_NEIGHBORS = (-50, -10)
-_MIN_NEIGHBORS = (10, 5)
-_MIN_SIZE = (60, 60)
-_MAX_SIZE = (600, 600)
-
-# TODO: Temporary
-"""
 _SCALE_FACTOR = 1.05
 _MIN_NEIGHBORS = 30
 _MIN_SIZE = (60, 60)
 _MAX_SIZE = (1024, 1024)
-"""
 
 # Private variables
 _FACE_DETECTOR_HAAR_CASCADE = None
@@ -53,8 +41,6 @@ _ESR_9 = None
 def detect_face(image):
     """
     TODO: Docstring
-
-    :param image:
     :return:
     """
 
@@ -91,7 +77,7 @@ def recognize_facial_expression(image, on_gpu):
         face = image[face_coordinates[0][1]:face_coordinates[1][1], face_coordinates[0][0]:face_coordinates[1][0], :]
 
         # Get device
-        device = torch.device("cuda" if on_gpu else "cpu")
+        device = torch.device('cuda' if on_gpu else 'cpu')
 
         # Pre_process detected face
         input_face = _pre_process_input_image(face)
@@ -148,8 +134,9 @@ def _dlib_face_detection(image):
 
     return face_coordinates
 
-def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIAL_NEIGHBORS,
-                  min_size=_MIN_SIZE, max_size=_MAX_SIZE):
+
+def _haar_cascade_face_detection(image, scale_factor=_SCALE_FACTOR, min_neighbors=_MIN_NEIGHBORS,
+                                 min_size=_MIN_SIZE, max_size=_MAX_SIZE):
     """
     Face detection using the Haar Feature-based Cascade Classifiers (Viola and Jones, 2004).
 
@@ -157,8 +144,8 @@ def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIA
     Viola, P. and Jones, M. J. (2004). Robust real-time face detection. International journal of computer vision, 57(2), 137-154.
 
     :param image: (ndarray) input image.
-    :param scale_factors:
-    :param initial_neighbors:
+    :param scale_factor:
+    :param min_neighbors:
     :param min_size:
     :param max_size:
     :return: (ndarray) If at least one face is detected, the method returns the coordinates of the closets face.
@@ -170,33 +157,23 @@ def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIA
 
     # Verify if haar cascade is initialized
     if _FACE_DETECTOR_HAAR_CASCADE is None:
-        _FACE_DETECTOR_HAAR_CASCADE = cv2.CascadeClassifier("./model/utils/templates/haar_cascade/frontal_face.xml")
+        _FACE_DETECTOR_HAAR_CASCADE = cv2.CascadeClassifier('./model/utils/templates/haar_cascade/frontal_face.xml')
 
     greyscale_image = uimage.convert_bgr_to_grey(image)
 
-    # TODO: Create an arg
-    trials = len(scale_factors)
+    # TODO: Verify calling the method without assignment
+    faces = _FACE_DETECTOR_HAAR_CASCADE.detectMultiScale(greyscale_image, scale_factor, min_neighbors, minSize=min_size, maxSize=max_size)
 
-    for t in range(trials):
-        for n in range(initial_neighbors[t], _MIN_NEIGHBORS[t] - 1, _DECREMENT_NEIGHBORS[t]):
-            # TODO: Debugging
-            # print("scale: " + str(scale_factors[t]) + "          n: " + str(n))
+    if len(faces) > 0:
+        for (x, y, w, h) in faces:
+            (xi, yi, xf, yf) = (x, y, x + w, y + h)
+            face_area = (xf - xi) * (yf - yi)
 
-            faces = _FACE_DETECTOR_HAAR_CASCADE.detectMultiScale(greyscale_image, scale_factors[t], n, minSize=min_size, maxSize=max_size)
+            if face_area > closest_face_area:
+                closest_face_area = face_area
+                face_coordinates = [(xi, yi), (xf, yf)]
 
-            # Look for the closest face and return its coordinates
-            if len(faces) > 0:
-                for (x, y, w, h) in faces:
-                    (xi, yi, xf, yf) = (x, y, x + w, y + h)
-                    face_area = (xf - xi) * (yf - yi)
-
-                    if face_area > closest_face_area:
-                        closest_face_area = face_area
-                        face_coordinates = [(xi, yi), (xf, yf)]
-                return face_coordinates
-
-    # In case of no faces
-    return None
+    return face_coordinates
 
 
 def _pre_process_input_image(image):

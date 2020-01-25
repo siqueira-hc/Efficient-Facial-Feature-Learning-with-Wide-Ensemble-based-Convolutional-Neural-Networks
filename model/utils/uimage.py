@@ -161,13 +161,16 @@ def read(path_to_image, convert_to_grey_scale=False):
     return loaded_image
 
 
+# TODO: Refactor
 def write(image, file_path, file_name):
-    # TODO: Refactor this implementation
     full_path = os.path.join(file_path, file_name)
+
     if not os.path.isdir(file_path):
         os.makedirs(file_path)
+
     cv2.imwrite(full_path, image)
-    print('Image saved at %s successfully.' % full_path)
+
+    print("Image saved at %s successfully." % full_path)
 
 # Image I/O <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -208,9 +211,9 @@ def draw_horizontal_bar(image, val, max, initial_coordinates, final_coordinates,
 
 def draw_graph(image, x, y, initial_coordinates, samples, text_x, text_y, color_x, color_y, thickness, offset, font_size, grid_color, size):
     # Params
-    plt.rcParams['figure.figsize'] = size
+    plt.rcParams["figure.figsize"] = size
     plt.rcParams["font.weight"] = "bold"
-    plt.rcParams.update({'font.size': font_size})
+    plt.rcParams.update({"font.size": font_size})
 
     # Initialization
     fig = plt.figure()
@@ -234,25 +237,25 @@ def draw_graph(image, x, y, initial_coordinates, samples, text_x, text_y, color_
 
     # Grid
     ax = plt.gca()
-    ax.grid(color=(np.array(grid_color) / 255.), linestyle='--')
-    ax.spines['top'].set_color((np.array(grid_color) / 255.))
-    ax.spines['top'].set_linestyle('--')
-    ax.spines['bottom'].set_color('#b5b5b5ff')
-    ax.spines['bottom'].set_linestyle('--')
-    ax.spines['right'].set_color('#b5b5b5ff')
-    ax.spines['right'].set_linestyle('--')
-    ax.spines['left'].set_color('#b5b5b5ff')
-    ax.spines['left'].set_linestyle('--')
-    ax.spines['right'].set_visible(False)
+    ax.grid(color=(np.array(grid_color) / 255.), linestyle="--")
+    ax.spines["top"].set_color((np.array(grid_color) / 255.))
+    ax.spines["top"].set_linestyle("--")
+    ax.spines["bottom"].set_color("#b5b5b5ff")
+    ax.spines["bottom"].set_linestyle("--")
+    ax.spines["right"].set_color("#b5b5b5ff")
+    ax.spines["right"].set_linestyle("--")
+    ax.spines["left"].set_color("#b5b5b5ff")
+    ax.spines["left"].set_linestyle("--")
+    ax.spines["right"].set_visible(False)
 
     # Legend
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.2, box.width, box.height * 0.9])
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=False, shadow=False, ncol=5)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), fancybox=False, shadow=False, ncol=5)
 
     # From plt to ndarray
     fig.canvas.draw()
-    data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+    data = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep="")
     data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     plt.close()
 

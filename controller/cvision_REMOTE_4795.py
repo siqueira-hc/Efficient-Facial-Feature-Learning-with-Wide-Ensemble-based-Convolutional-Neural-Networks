@@ -16,7 +16,6 @@ import torch
 from torchvision import transforms
 from PIL import Image
 import cv2
-import dlib
 
 # Modules
 from model.esr.fer import FER
@@ -26,7 +25,7 @@ from model.esr.esr_9 import Ensemble
 
 # Haar-cascade Fast, Slow, Very-Slow
 
-# Private default values
+# Default values
 _SCALE_FACTORS = (10.0, 1.3)
 _INITIAL_NEIGHBORS = (205, 35)
 _DECREMENT_NEIGHBORS = (-50, -10)
@@ -44,7 +43,6 @@ _MAX_SIZE = (1024, 1024)
 
 # Private variables
 _FACE_DETECTOR_HAAR_CASCADE = None
-_FACE_DETECTOR_DLIB = None
 _ESR_9 = None
 
 
@@ -57,14 +55,7 @@ def detect_face(image):
     :param image:
     :return:
     """
-
-    # TODO: Debugging
-
-    # Measure time
-    to_return = _dlib_face_detection(image)
-    # return _haar_cascade_face_detection(image)
-
-    return to_return
+    return _haar_cascade(image)
 
 
 def recognize_facial_expression(image, on_gpu):
@@ -110,44 +101,6 @@ def recognize_facial_expression(image, on_gpu):
 
 # Private methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-def _dlib_face_detection(image):
-    """
-    Face detection using the CNN implementation from Dlib.
-
-    References:
-    Davis E. King. Dlib-ml: A Machine Learning Toolkit. Journal of Machine Learning Research 10, pp. 1755-1758, 2009
-
-    :param image: (ndarray) Raw image
-    :return: The coordinates of the detected face
-    """
-    # TODO: Debugging
-    print(image.shape)
-
-
-    global _FACE_DETECTOR_DLIB
-
-    closest_face_area = 0
-    face_coordinates = None
-
-    # Verify if dlib is initialized
-    if _FACE_DETECTOR_DLIB is None:
-        _FACE_DETECTOR_DLIB = dlib.cnn_face_detection_model_v1('./model/utils/templates/dlib/cnn_face_detector.dat')
-
-    # Call face detection algorithm: (image, up_sample)
-    faces = _FACE_DETECTOR_DLIB(image, 0)
-
-    # Find the closest face if any is detected
-    if not (faces is None):
-        for face_id, location in enumerate(faces):
-            xi, xf, yi, yf = (location.rect.left(), location.rect.right(), location.rect.top(), location.rect.bottom())
-            face_area = (xf - xi) * (yf - yi)
-
-            if face_area > closest_face_area:
-                closest_face_area = face_area
-                face_coordinates = [(xi, yi), (xf, yf)]
-
-    return face_coordinates
-
 def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIAL_NEIGHBORS,
                   min_size=_MIN_SIZE, max_size=_MAX_SIZE):
     """
@@ -165,12 +118,12 @@ def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIA
     """
     global _FACE_DETECTOR_HAAR_CASCADE
 
-    closest_face_area = 0
-    face_coordinates = None
-
     # Verify if haar cascade is initialized
     if _FACE_DETECTOR_HAAR_CASCADE is None:
         _FACE_DETECTOR_HAAR_CASCADE = cv2.CascadeClassifier("./model/utils/templates/haar_cascade/frontal_face.xml")
+
+    closest_face_area = 0
+    face_coordinates = None
 
     greyscale_image = uimage.convert_bgr_to_grey(image)
 

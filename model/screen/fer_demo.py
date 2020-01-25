@@ -321,7 +321,7 @@ class FERDemo:
 
         # Text: Activation
         uimage.draw_text(block,
-                         FERDemo._TEXT_ACTIVATION + '  {:.2f}'.format(arousal),
+                         FERDemo._TEXT_ACTIVATION + "  {:.2f}".format(arousal),
                          FERDemo._BLOCK_INIT_POS_TEXT_ACTIVATION[self._screen_size],
                          FERDemo._COLOUR_BGR_BLACK,
                          FERDemo._TEXT_PARAM_SCALE[self._screen_size],
@@ -329,7 +329,7 @@ class FERDemo:
 
         # Text: Pleasant
         uimage.draw_text(block,
-                         FERDemo._TEXT_PLEASANT + ('  0.00' if valence < 0 else '  {:.2f}'.format(valence)),
+                         FERDemo._TEXT_PLEASANT + ("  0.00" if valence < 0 else "  {:.2f}".format(valence)),
                          FERDemo._BLOCK_INIT_POS_TEXT_PLEASANT[self._screen_size],
                          FERDemo._COLOUR_BGR_BLACK,
                          FERDemo._TEXT_PARAM_SCALE[self._screen_size],
@@ -337,7 +337,7 @@ class FERDemo:
 
         # Text: Unpleasant
         uimage.draw_text(block,
-                         FERDemo._TEXT_UNPLEASANT + ('  {:.2f}'.format(valence) if valence < 0 else '  0.00'),
+                         FERDemo._TEXT_UNPLEASANT + ("  {:.2f}".format(valence) if valence < 0 else "  0.00"),
                          FERDemo._BLOCK_INIT_POS_TEXT_UNPLEASANT[self._screen_size],
                          FERDemo._COLOUR_BGR_BLACK,
                          FERDemo._TEXT_PARAM_SCALE[self._screen_size],
@@ -402,6 +402,7 @@ class FERDemo:
             # Brightness
             mean = np.mean(self._background)
             gamma = 0.75 if mean > 100 else 1.5
+            mean = mean if mean > 50 else 100
             self._background = np.clip((gamma * self._background) + mean, 0, 255).astype(np.uint8)
 
     def _get_container(self, x, y, h, w):

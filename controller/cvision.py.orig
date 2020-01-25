@@ -24,9 +24,12 @@ from model.utils import uimage, udata
 from model.esr.esr_9 import Ensemble
 
 
+<<<<<<< HEAD
+# Private default values
+=======
 # Haar-cascade Fast, Slow, Very-Slow
 
-# Private default values
+# Default values
 _SCALE_FACTORS = (10.0, 1.3)
 _INITIAL_NEIGHBORS = (205, 35)
 _DECREMENT_NEIGHBORS = (-50, -10)
@@ -36,6 +39,7 @@ _MAX_SIZE = (600, 600)
 
 # TODO: Temporary
 """
+>>>>>>> 20b9d47f4ad3a10c81d6f5c6b5a15054576ba746
 _SCALE_FACTOR = 1.05
 _MIN_NEIGHBORS = 30
 _MIN_SIZE = (60, 60)
@@ -110,6 +114,7 @@ def recognize_facial_expression(image, on_gpu):
 
 # Private methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+<<<<<<< HEAD
 def _dlib_face_detection(image):
     """
     Face detection using the CNN implementation from Dlib.
@@ -148,8 +153,13 @@ def _dlib_face_detection(image):
 
     return face_coordinates
 
+
+def _haar_cascade_face_detection(image, scale_factor=_SCALE_FACTOR, min_neighbors=_MIN_NEIGHBORS,
+                                 min_size=_MIN_SIZE, max_size=_MAX_SIZE):
+=======
 def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIAL_NEIGHBORS,
                   min_size=_MIN_SIZE, max_size=_MAX_SIZE):
+>>>>>>> 20b9d47f4ad3a10c81d6f5c6b5a15054576ba746
     """
     Face detection using the Haar Feature-based Cascade Classifiers (Viola and Jones, 2004).
 

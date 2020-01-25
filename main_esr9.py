@@ -195,10 +195,17 @@ def main():
     parser.add_argument("-np", "--no_plot", help="do not display activation and (un)pleasant graph",
                         action="store_true", default=False)
 
+    parser.add_argument("-fd", "--face_detection",
+                        help="defines the face detection algorithm:" +
+                             "\n1 - Haar Feature-based Cascade Classifiers (Viola and Jones, 2004)." +
+                             "\n[Warning] The chosen algorithm may affect performance.",
+                        type=int, choices=[1], default=1)
+
     args = parser.parse_args()
 
     # Calls to main methods
     # TODO: Double-check args. Many are missing.
+    # TODO: Double-check validation methods.
     if args.mode == "image":
         try:
             cvalidation.validate_image_video_mode_arguments(args)
