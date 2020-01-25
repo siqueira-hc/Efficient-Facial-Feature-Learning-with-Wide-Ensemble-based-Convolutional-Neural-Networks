@@ -120,7 +120,7 @@ def _dlib_face_detection(image):
     :param image: (ndarray) Raw image
     :return: The coordinates of the detected face
     """
-    # TODO: Debugging
+    # TODO: Debugging - to be removed
     print(image.shape)
 
 
