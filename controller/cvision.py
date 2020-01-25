@@ -57,14 +57,14 @@ def detect_face(image):
     :param image:
     :return:
     """
-
-    # TODO: Debugging
-
-    # Measure time
-    to_return = _dlib_face_detection(image)
-    # return _haar_cascade_face_detection(image)
-
-    return to_return
+    #
+    # # TODO: Debugging
+    #
+    # # Measure time
+    # to_return = _dlib_face_detection(image)
+    #
+    # return to_return
+    return _haar_cascade_face_detection(image)
 
 
 def recognize_facial_expression(image, on_gpu):
@@ -148,7 +148,8 @@ def _dlib_face_detection(image):
 
     return face_coordinates
 
-def _haar_cascade(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIAL_NEIGHBORS,
+
+def _haar_cascade_face_detection(image, scale_factors=_SCALE_FACTORS, initial_neighbors=_INITIAL_NEIGHBORS,
                   min_size=_MIN_SIZE, max_size=_MAX_SIZE):
     """
     Face detection using the Haar Feature-based Cascade Classifiers (Viola and Jones, 2004).
