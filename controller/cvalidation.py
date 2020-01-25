@@ -26,7 +26,7 @@ def is_none(x):
 def validate_image_video_mode_arguments(args):
     """
     User input validation.
-    This method validates the arguments passed by users through the terminal when 'mode' is set to 'image' or 'video' in 'main_esr9.py'.
+    Validates the arguments passed by users through the terminal when 'mode' is set to 'image' or 'video' in 'main_esr9.py'.
 
     :param args: arguments passed through the terminal.
     :return: void
@@ -47,8 +47,7 @@ def validate_image_video_mode_arguments(args):
 
 def validate_webcam_mode_arguments(args):
     """
-    User input validation.
-    This method validates the arguments passed by users through the terminal when 'mode' is set to 'webcam' in 'main_esr9.py'.
+    Validates the arguments passed by users through the terminal when 'mode' is set to 'webcam' in 'main_esr9.py'.
 
     :param args: arguments passed through the terminal.
     :return: void

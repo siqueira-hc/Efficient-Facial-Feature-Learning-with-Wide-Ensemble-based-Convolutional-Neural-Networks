@@ -19,9 +19,9 @@ from model.utils import uimage
 from model.screen.fer_demo import FERDemo
 
 
-def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot):
+def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot, face_detection):
     """
-    This method receives images from a camera and recognizes
+    Receives images from a camera and recognizes
     facial expressions of the closets face in a frame-based approach.
 
     TODO: Write docstring.
@@ -55,7 +55,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
             # Get a frame
             image = uimage.get_frame()
 
-            fer = None if (image is None) else cvision.recognize_facial_expression(image, device)
+            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection)
 
             # Display blank screen if no face is detected, otherwise,
             # display detected faces and perceived facial expression labels
@@ -75,9 +75,9 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
         fer_demo.quit()
 
 
-def image(input_image_path, display, gradcam, output_csv_file, screen_size, device, branch):
+def image(input_image_path, display, gradcam, output_csv_file, screen_size, device, branch, face_detection):
     """
-    This method receives the full path to a image file and recognizes
+    Receives the full path to a image file and recognizes
     facial expressions of the closets face in a frame-based approach.
 
     TODO: Write docstring.
@@ -95,7 +95,7 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
     image = uimage.read(input_image_path)
 
     # Call FER method
-    fer = cvision.recognize_facial_expression(image, device)
+    fer = cvision.recognize_facial_expression(image, device, face_detection)
 
     # TODO: Implement
     if output_csv_file:
@@ -109,9 +109,9 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
         fer_demo.quit()
 
 
-def video(input_video_path, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot):
+def video(input_video_path, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot, face_detection):
     """
-    This method receives the full path to a video file and recognizes
+    Receives the full path to a video file and recognizes
     facial expressions of the closets face in a frame-based approach.
 
     TODO: Write docstring.
@@ -145,7 +145,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
             # Get a frame
             image = uimage.get_frame()
 
-            fer = None if (image is None) else cvision.recognize_facial_expression(image, device)
+            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection)
 
             # Display blank screen if no face is detected, otherwise,
             # display detected faces and perceived facial expression labels
@@ -197,9 +197,10 @@ def main():
 
     parser.add_argument("-fd", "--face_detection",
                         help="defines the face detection algorithm:" +
-                             "\n1 - Haar Feature-based Cascade Classifiers (Viola and Jones, 2004)." +
-                             "\n[Warning] The chosen algorithm may affect performance.",
-                        type=int, choices=[1], default=1)
+                             "\n1 - Dlib (King, 2009)." +
+                             "\n2 - Haar Cascade Classifiers (Viola and Jones, 2004)." +
+                             "\n[Warning] Dlib is slower but accurate, whereas haar cascade is faster but not accurate",
+                        type=int, choices=[1, 2], default=1)
 
     args = parser.parse_args()
 
@@ -209,19 +210,19 @@ def main():
     if args.mode == "image":
         try:
             cvalidation.validate_image_video_mode_arguments(args)
-            image(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.branch)
+            image(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.branch, args.face_detection)
         except RuntimeError as e:
             print(e)
     elif args.mode == "video":
         try:
             cvalidation.validate_image_video_mode_arguments(args)
-            video(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot)
+            video(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
         except RuntimeError as e:
             print(e)
     elif args.mode == "webcam":
         try:
             cvalidation.validate_webcam_mode_arguments(args)
-            webcam(args.webcam_id, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot)
+            webcam(args.webcam_id, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
         except RuntimeError as e:
             print(e)
 
