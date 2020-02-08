@@ -197,10 +197,11 @@ def main():
 
     parser.add_argument("-fd", "--face_detection",
                         help="defines the face detection algorithm:" +
-                             "\n1 - Dlib (King, 2009)." +
-                             "\n2 - Haar Cascade Classifiers (Viola and Jones, 2004)." +
-                             "\n[Warning] Dlib is slower but accurate, whereas haar cascade is faster but not accurate",
-                        type=int, choices=[1, 2], default=1)
+                             "\n1 - Optimized Dlib." +
+                             "\n2 - Standard Dlib (King, 2009)." +
+                             "\n3 - Haar Cascade Classifiers (Viola and Jones, 2004)." +
+                             "\n[Warning] Dlib is slower but accurate, whereas haar cascade is faster but less accurate",
+                        type=int, choices=[1, 2, 3], default=1)
 
     args = parser.parse_args()
 

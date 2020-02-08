@@ -36,9 +36,10 @@ _DLIB_SCALE_FACTOR_THRESHOLD = (500 * 500)
 
 # Face detector methods
 _ID_FACE_DETECTOR_DLIB = 1
+_ID_FACE_DETECTOR_DLIB_STANDARD = 2
 _FACE_DETECTOR_DLIB = None
 
-_ID_FACE_DETECTOR_HAAR_CASCADE = 2
+_ID_FACE_DETECTOR_HAAR_CASCADE = 3
 _FACE_DETECTOR_HAAR_CASCADE = None
 
 # Facial expression recognition network: ensemble with shared representations (ESR)
@@ -63,7 +64,7 @@ def detect_face(image, face_detection_method=_ID_FACE_DETECTOR_DLIB):
 
     if face_detection_method == _ID_FACE_DETECTOR_HAAR_CASCADE:
         face_coordinates = _haar_cascade_face_detection(greyscale_image, _HAAR_SCALE_FACTOR, _HAAR_NEIGHBORS, _HAAR_MIN_SIZE)
-    else:
+    elif face_detection_method == _ID_FACE_DETECTOR_DLIB:
         # If input image is large, upper-bound of the scale factor is 0.5
         scale_factors = _DLIB_SCALE_FACTOR_LARGE_IMAGES if (greyscale_image.size > _DLIB_SCALE_FACTOR_THRESHOLD) else _DLIB_SCALE_FACTOR_SMALL_IMAGES
 
@@ -76,6 +77,8 @@ def detect_face(image, face_detection_method=_ID_FACE_DETECTOR_DLIB):
             if len(face_coordinates) > 0:
                 face_coordinates = ((1 / scale) * face_coordinates).astype(int)
                 break
+    else: # Standard Dlib
+        face_coordinates = _dlib_face_detection(greyscale_image).astype(int)
 
     # Returns None if no face is detected
     return face_coordinates[0] if (len(face_coordinates) > 0 and (np.sum(face_coordinates[0]) > 0)) else None
