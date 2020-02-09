@@ -2,14 +2,15 @@
 **This web page is on development as well as some features of our framework!**
 
 This repository contains:
-- Facial expression recognition framework;
-- Introduction to Ensembles with Shared Representations;
-- Implementation of an Ensemble with Shared Representations in PyTorch;
-- Scripts of experiments conducted for the AAAI-2020 conference;
+- Facial expression recognition framework.
+- Introduction to Ensembles with Shared Representations.
+- Implementation of an Ensemble with Shared Representations in PyTorch.
+- Scripts of experiments conducted for the AAAI-2020 conference.
 - [Our AAAI-2020 paper](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020.pdf).
+- [Our AAAI-2020 poster](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020-Poster.pdf).
 
 #### Updates
-- Currently improving face detection algorithm;
+- Face detection algorithm has been improved!
 - The option to run facial expression recognition on GPU is now available. 
 
 # Facial Expression Recognition Framework
@@ -20,7 +21,7 @@ The facial expression recognition framework can be started by running **main_esr
 
 ## Getting Started
 ### Installation
-1. Install python 3.6;
+1. Install python 3.6.
 2. Install dependencies by running:
 
 ```
@@ -38,8 +39,8 @@ Main python libraries used in our framework:
 ### Features
 The facial expression recognition framework has three main features:
 
-1. Image: recognizes facial expressions in images;
-2. Video: recognizes facial expressions in videos in a frame-based approach;
+1. Image: recognizes facial expressions in images.
+2. Video: recognizes facial expressions in videos in a frame-based approach.
 3. Webcam: connects to a webcam and recognizes facial expressions of the closest face detected by a face detection algorithm.
 
 You can also import cvision and call the method **recognize_facial_expression** as follows:
@@ -102,7 +103,7 @@ You can run python `main_esr9.py -h` or `python main_esr9.py -help` to display t
 
 Positional arguments:
 - **mode**:
-	- Selects the running mode of the demo which are 'image', 'video' or 'webcam';
+	- Selects the running mode of the demo which are 'image', 'video' or 'webcam'.
 	- Input values: {image, video, webcam}.
 
 Optional arguments:
@@ -114,8 +115,8 @@ Optional arguments:
 	- Defines the full path to an image or video.
 - **-s (--size)**:
 	- Defines the size of the window:
-		1. 1920 x 1080;
-		2. 1440 x 900;
+		1. 1920 x 1080.
+		2. 1440 x 900.
 		3. 1024 x 768.
 	- Input values: {1, 2, 3}.
 - **-b (--branch)**:
@@ -125,8 +126,9 @@ Optional arguments:
 - **-fd (--face_detection)**:
 	- _**[On development]**_
 	- Defines the face detection algorithm:
-	    - Haar Feature-based Cascade Classifiers (Viola and Jones, 2004);
-	    - _Other methods will be added soon._
+	    - 1. Optimized Dlib.
+	    - 2. Standard Dlib (King, 2009).
+	    - 3. Haar Cascade Classifiers (Viola and Jones, 2004).
 	- _Warning: the chosen algorithm may affect performance._
 - **-c (--cuda)**:
 	- Runs facial expression recognition on GPU.
