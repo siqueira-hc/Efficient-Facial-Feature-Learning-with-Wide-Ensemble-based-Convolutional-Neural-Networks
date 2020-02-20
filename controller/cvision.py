@@ -21,7 +21,7 @@ import dlib
 # Modules
 from model.esr.fer import FER
 from model.utils import uimage, udata
-from model.esr.esr_9 import Ensemble
+from model.esr.esr_9 import ESR
 
 
 # Haar cascade parameters
@@ -193,19 +193,27 @@ def _pre_process_input_image(image):
     :return: (ndarray) image
     """
 
-    image = uimage.resize(image, Ensemble.INPUT_IMAGE_SIZE)
+    image = uimage.resize(image, ESR.INPUT_IMAGE_SIZE)
     image = Image.fromarray(image)
-    image = transforms.Normalize(mean=Ensemble.INPUT_IMAGE_NORMALIZATION_MEAN,
-                                 std=Ensemble.INPUT_IMAGE_NORMALIZATION_STD)(transforms.ToTensor()(image)).unsqueeze(0)
+    image = transforms.Normalize(mean=ESR.INPUT_IMAGE_NORMALIZATION_MEAN,
+                                 std=ESR.INPUT_IMAGE_NORMALIZATION_STD)(transforms.ToTensor()(image)).unsqueeze(0)
 
     return image
 
 
 def _predict(input_face, device):
+    """
+    Facial expression recognition. Classifies the pre-processed input image with ESR-9.
+
+    :param input_face: (ndarray) input image.
+    :param device: runs the classification on CPU or GPU
+    :return: Lists of emotions and affect values including the ensemble predictions based on plurality.
+    """
+
     global _ESR_9
 
     if _ESR_9 is None:
-        _ESR_9 = Ensemble.load(device)
+        _ESR_9 = ESR.load(device)
 
     to_return_emotion = []
     to_return_affect = None
@@ -216,18 +224,24 @@ def _predict(input_face, device):
     # Computes ensemble prediction for affect
     # Converts from Tensor to ndarray
     affect = np.array([a[0].cpu().detach().numpy() for a in affect])
+
     # Normalizes arousal
     affect[:, 1] = np.clip((affect[:, 1] + 1)/2.0, 0, 1)
+
     # Computes mean arousal and valence as the ensemble prediction
     ensemble_affect = np.expand_dims(np.mean(affect, 0), axis=0)
+
     # Concatenates the ensemble prediction to the list of affect predictions
     to_return_affect = np.concatenate((affect, ensemble_affect), axis=0)
 
     # Computes ensemble prediction for emotion
+
     # Converts from Tensor to ndarray
     emotion = np.array([e[0].cpu().detach().numpy() for e in emotion])
+
     # Gets number of classes
     num_classes = emotion.shape[1]
+
     # Computes votes and add label to the list of emotions
     emotion_votes = np.zeros(num_classes)
     for e in emotion:
