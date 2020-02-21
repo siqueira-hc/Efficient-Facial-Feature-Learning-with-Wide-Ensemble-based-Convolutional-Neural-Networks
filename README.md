@@ -1,4 +1,8 @@
 # Efficient Facial Feature Learning with Wide Ensemble-based Convolutional Neural Networks
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-facial-feature-learning-with-wide/facial-expression-recognition-on-affectnet)](https://paperswithcode.com/sota/facial-expression-recognition-on-affectnet?p=efficient-facial-feature-learning-with-wide)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-facial-feature-learning-with-wide/facial-expression-recognition-on-fer)](https://paperswithcode.com/sota/facial-expression-recognition-on-fer?p=efficient-facial-feature-learning-with-wide)
+
 **This web page is on development as well as some features of our framework!**
 
 This repository contains:
