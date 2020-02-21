@@ -12,6 +12,7 @@ __version__ = "0.1"
 
 # Standard Libraries
 import argparse
+from argparse import RawTextHelpFormatter
 
 # Modules
 from controller import cvalidation, cvision
@@ -167,7 +168,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
 
 def main():
     # Parser
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='test', formatter_class=RawTextHelpFormatter)
     parser.add_argument("mode", help="selects a method among 'image', 'video' or 'webcam' to run ESR-9.",
                         type=str, choices=["image", "video", "webcam"])
     parser.add_argument("-d", "--display", help="displays the output of ESR-9.",

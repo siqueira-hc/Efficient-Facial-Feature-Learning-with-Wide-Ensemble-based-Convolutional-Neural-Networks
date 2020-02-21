@@ -92,10 +92,10 @@ class ConvolutionalBranch(nn.Module):
         self.bn4 = nn.BatchNorm2d(512)
 
         # Second last, fully-connected layer related to discrete emotion labels
-        self.fc_discrete_emotion = nn.Linear(512, 8)
+        self.fc = nn.Linear(512, 8)
 
         # Last, fully-connected layer related to continuous affect levels (arousal and valence)
-        self.fc_continuous_affect = nn.Linear(8, 2)
+        self.fc_dimensional = nn.Linear(8, 2)
 
         # Pooling layers
         # Max-pooling layer
@@ -113,13 +113,13 @@ class ConvolutionalBranch(nn.Module):
         x_conv_branch = x_conv_branch.view(-1, 512)
 
         # Fully connected layer for emotion perception
-        discrete_emotion = self.fc_discrete_emotion(x_conv_branch)
+        discrete_emotion = self.fc(x_conv_branch)
 
         # Application of the ReLU function to neurons related to discrete emotion labels
         x_conv_branch = F.relu(discrete_emotion)
 
         # Fully connected layer for affect perception
-        continuous_affect = self.fc_continuous_affect(x_conv_branch)
+        continuous_affect = self.fc_dimensional(x_conv_branch)
 
         # Returns activations of the discrete emotion output layer and arousal and valence levels
         return discrete_emotion, continuous_affect
@@ -161,7 +161,7 @@ class ConvolutionalBranch(nn.Module):
         x_to_output_layer = x_to_output_layer.view(-1, 512)
 
         # Output layer: emotion labels
-        x_to_output_layer = self.fc_discrete_emotion(x_to_output_layer)
+        x_to_output_layer = self.fc(x_to_output_layer)
 
         # Returns activations of the discrete emotion output layer
         return x_to_output_layer
@@ -177,21 +177,41 @@ class ESR(nn.Module):
     independent convolutional branches (class ConvolutionalBranch) that constitute the ensemble.'
     """
 
+    # Default values
+    # Input size
     INPUT_IMAGE_SIZE = (96, 96)
+    # Values for pre-processing input data
     INPUT_IMAGE_NORMALIZATION_MEAN = [0.0, 0.0, 0.0]
     INPUT_IMAGE_NORMALIZATION_STD = [1.0, 1.0, 1.0]
+    # Path to saved network
+    PATH_TO_SAVED_NETWORK = "./model/esr/trained_models/esr_9"
+    FILE_NAME_BASE_NETWORK = "Net-Base-Shared_Representations.pt"
+    FILE_NAME_CONV_BRANCH = "Net-Branch_{}.pt"
 
-    def __init__(self):
+    def __init__(self, device):
+        """
+        Loads ESR-9.
+
+        :param device: Device to load ESR-9: GPU or CPU.
+        """
+
         super(ESR, self).__init__()
 
         # Base of ESR-9 as described in the docstring (see mark 1)
         self.base = Base()
+        self.base.load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK, ESR.FILE_NAME_BASE_NETWORK), map_location=device))
+        self.base.to(device)
 
-        # Convolutional branches that composes the ensemble in  of ESR-9 as described in the docstring (see mark 2)
+        # Load 9 convolutional branches that composes ESR-9 as described in the docstring (see mark 2)
         self.convolutional_branches = []
+        for i in range(1, len(self) + 1):
+            self.convolutional_branches.append(ConvolutionalBranch())
+            self.convolutional_branches[-1].load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK, ESR.FILE_NAME_CONV_BRANCH.format(i)), map_location=device))
+            self.convolutional_branches[-1].to(device)
 
-    def get_ensemble_size(self):
-        return len(self.convolutional_branches)
+        self.to(device)
+        # Evaluation mode on
+        self.eval()
 
     def forward(self, x):
         """
@@ -216,40 +236,9 @@ class ESR(nn.Module):
 
         return emotions, affect_values
 
-    @staticmethod
-    def load(device):
-        ensemble_size = 9
-        loaded_model = ESR()
-        loaded_model.to(device)
-        loaded_model.convolutional_branches = []
-
-        # Load Base
-        loaded_model_base = Base()
-        loaded_model_base.load_state_dict(torch.load(path.join("./model/esr/trained_models/esr_9", "Net-Base-Shared_Representations.pkl"), map_location=device))
-        loaded_model.base = loaded_model_base
-        loaded_model.base.to(device)
-
-        # Load Branches
-        for i in range(1, ensemble_size + 1):
-            loaded_model_branch = ConvolutionalBranch()
-            loaded_model_branch.load_state_dict(torch.load(path.join("./model/esr/trained_models/esr_9", "Net-Branch_{}.pkl".format(i)), map_location=device))
-
-            loaded_model.convolutional_branches.append(loaded_model_branch)
-            loaded_model.convolutional_branches[-1].to(device)
-
-        return loaded_model
-
-    def to_state_dict(self):
-        state_dicts = [copy.deepcopy(self.base.state_dict())]
-
-        for b in self.convolutional_branches:
-            state_dicts.append(copy.deepcopy(b.state_dict()))
-
-        return state_dicts
-
-    def to_device(self, device_to_process="cpu"):
-        self.to(device_to_process)
-        self.base.to(device_to_process)
-
-        for b_td in self.convolutional_branches:
-            b_td.to(device_to_process)
+    def __len__(self):
+        """
+        ESR with nine branches trained on AffectNet (Siqueira et al., 2020).
+        :return: (int) Size of the ensemble
+        """
+        return 9

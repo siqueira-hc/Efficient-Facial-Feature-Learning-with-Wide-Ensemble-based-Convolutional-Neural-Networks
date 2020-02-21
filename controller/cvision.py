@@ -213,7 +213,7 @@ def _predict(input_face, device):
     global _ESR_9
 
     if _ESR_9 is None:
-        _ESR_9 = ESR.load(device)
+        _ESR_9 = ESR(device)
 
     to_return_emotion = []
     to_return_affect = None
