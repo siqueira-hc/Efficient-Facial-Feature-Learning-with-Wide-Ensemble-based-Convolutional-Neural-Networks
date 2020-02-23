@@ -72,7 +72,7 @@ The framework should display the following image:
 
 ![Example of the output of the framework in the image mode](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/image_mode.png)
 
-You can also visualize regions in the image relevant for the classification of a facial expression by adding -b -g as arguments:
+You can also visualize regions in the image relevant for the classification of facial expression by adding -b -g as arguments:
 
 ```
 python main_esr9.py image -i ./media/jackie.jpg -d -s 2 -b -g
@@ -84,7 +84,7 @@ The framework should display the following image:
 
 ![Example of the output of the framework in the image mode with Grad-CAM activated](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/grad_cam.png)
 
-Zoom in with the mouse wheel for a better visualization:
+Zoom in with the mouse wheel for better visualization:
 
 ![Zoom-in image with Grad-CAM activated](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/grad_cam_zoom-in.png)
 
