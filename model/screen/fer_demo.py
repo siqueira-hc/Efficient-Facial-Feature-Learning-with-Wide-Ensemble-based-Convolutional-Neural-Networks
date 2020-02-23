@@ -234,7 +234,9 @@ class FERDemo:
                     # Branches
                     for branch in range(len(self._fer.list_emotion) - 1):
                         # Superimpose saliency map on input face image
-                        grad_cam = uimage.superimpose(self._fer.get_grad_cam(branch), face_image)
+                        grad_cam = self._fer.get_grad_cam(branch)
+                        if not (grad_cam is None):
+                            grad_cam = uimage.superimpose(grad_cam, face_image)
 
                         # Generate block of the branch prediction
                         block = self._generate_block(FERDemo._TEXT_BRANCH.format(branch + 1),
