@@ -14,7 +14,7 @@ This repository contains:
 - [Our AAAI-2020 poster](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020-Poster.pdf).
 
 #### Updates
-- **The Grad-CAM visualization algorithm has been implemented!** See [the image mode section](#facial-expression-recognition-in-images:-image-mode) to learn more about this new feature. 
+- **The Grad-CAM visualization algorithm has been implemented!** See [the image mode section](#facial-expression-recognition-in-images-image-mode) to learn more about this new feature. 
 - Face detection algorithm has been improved!
 - The option to run facial expression recognition on GPU is now available. 
 
