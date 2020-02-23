@@ -8,7 +8,7 @@ This module implements computer vision methods.
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.1"
+__version__ = "0.2"
 
 # External Libraries
 import numpy as np
@@ -19,9 +19,10 @@ import cv2
 import dlib
 
 # Modules
-from model.esr.fer import FER
+from model.ml.fer import FER
 from model.utils import uimage, udata
-from model.esr.esr_9 import ESR
+from model.ml.esr_9 import ESR
+from model.ml.grad_cam import GradCAM
 
 
 # Haar cascade parameters
@@ -42,9 +43,11 @@ _FACE_DETECTOR_DLIB = None
 _ID_FACE_DETECTOR_HAAR_CASCADE = 3
 _FACE_DETECTOR_HAAR_CASCADE = None
 
-# Facial expression recognition network: ensemble with shared representations (ESR)
+# Facial expression recognition network: Ensemble with Shared Representations (ESR)
 _ESR_9 = None
 
+# Saliency map generation: Grad-CAM
+_GRAD_CAM = None
 
 # Public methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -84,7 +87,7 @@ def detect_face(image, face_detection_method=_ID_FACE_DETECTOR_DLIB):
     return face_coordinates[0] if (len(face_coordinates) > 0 and (np.sum(face_coordinates[0]) > 0)) else None
 
 
-def recognize_facial_expression(image, on_gpu, face_detection_method):
+def recognize_facial_expression(image, on_gpu, face_detection_method, grad_cam):
     """
     Detects a face in the input image.
     If more than one face is detected, the biggest one is used.
@@ -98,6 +101,7 @@ def recognize_facial_expression(image, on_gpu, face_detection_method):
     """
 
     to_return_fer = None
+    saliency_maps = []
 
     # Detect face
     face_coordinates = detect_face(image, face_detection_method)
@@ -115,10 +119,15 @@ def recognize_facial_expression(image, on_gpu, face_detection_method):
         input_face = input_face.to(device)
 
         # Recognize facial expression
-        emotion, affect = _predict(input_face, device)
+        # emotion_idx is needed to run Grad-CAM
+        emotion, affect, emotion_idx = _predict(input_face, device)
+
+        # Grad-CAM
+        if grad_cam:
+            saliency_maps = _generate_saliency_maps(input_face, emotion_idx, device)
 
         # Initialize GUI object
-        to_return_fer = FER(image, face, face_coordinates, emotion, affect)
+        to_return_fer = FER(image, face, face_coordinates, emotion, affect, saliency_maps)
 
     return to_return_fer
 
@@ -216,6 +225,7 @@ def _predict(input_face, device):
         _ESR_9 = ESR(device)
 
     to_return_emotion = []
+    to_return_emotion_idx = []
     to_return_affect = None
 
     # Recognizes facial expression
@@ -234,8 +244,7 @@ def _predict(input_face, device):
     # Concatenates the ensemble prediction to the list of affect predictions
     to_return_affect = np.concatenate((affect, ensemble_affect), axis=0)
 
-    # Computes ensemble prediction for emotion
-
+    # Computes ensemble prediction concerning emotion labels
     # Converts from Tensor to ndarray
     emotion = np.array([e[0].cpu().detach().numpy() for e in emotion])
 
@@ -246,12 +255,31 @@ def _predict(input_face, device):
     emotion_votes = np.zeros(num_classes)
     for e in emotion:
         e_idx = np.argmax(e)
+        to_return_emotion_idx.append(e_idx)
         to_return_emotion.append(udata.AffectNetCategorical.get_class(e_idx))
         emotion_votes[e_idx] += 1
 
     # Concatenates the ensemble prediction to the list of emotion predictions
     to_return_emotion.append(udata.AffectNetCategorical.get_class(np.argmax(emotion_votes)))
 
-    return to_return_emotion, to_return_affect
+    return to_return_emotion, to_return_affect, to_return_emotion_idx
+
+
+def _generate_saliency_maps(input_face, emotion_outputs, device):
+    """
+    Generates saliency maps for every branch in the ensemble with Grad-CAM.
+
+    :param input_face: (ndarray) input image.
+    :param device: runs the classification on CPU or GPU
+    :return: (ndarray) Saliency maps.
+    """
+
+    global _GRAD_CAM, _ESR_9
+
+    if _GRAD_CAM is None:
+        _GRAD_CAM = GradCAM(_ESR_9, device)
+
+    # Generate saliency map
+    return _GRAD_CAM.grad_cam(input_face, emotion_outputs)
 
 # Private methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

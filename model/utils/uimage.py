@@ -8,7 +8,7 @@ This modules implements image processing methods.
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.1"
+__version__ = "0.2"
 
 # Standard Libraries
 import os
@@ -34,7 +34,7 @@ def set_fps(fps):
 
 def is_video_capture_open():
     """
-    TODO: Write docstring.
+    TODO: Write docstring
 
     :return:
     """
@@ -49,7 +49,7 @@ def is_video_capture_open():
 
 def initialize_video_capture(source):
     """
-    TODO: Write docstring.
+    TODO: Write docstring
 
     :param source:
     :return:
@@ -78,7 +78,7 @@ def initialize_video_capture(source):
 
 def release_video_capture():
     """
-    TODO: Write docstring.
+    TODO: Write docstring
     :return:
     """
     global _CAP
@@ -161,7 +161,6 @@ def read(path_to_image, convert_to_grey_scale=False):
     return loaded_image
 
 
-# TODO: Refactor
 def write(image, file_path, file_name):
     full_path = os.path.join(file_path, file_name)
 
@@ -170,12 +169,16 @@ def write(image, file_path, file_name):
 
     cv2.imwrite(full_path, image)
 
-    print("Image saved at %s successfully." % full_path)
+    print("Image successfully saved at: %s" % full_path)
 
 # Image I/O <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 # Color conversion methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+def convert_grey_to_bgr(image):
+    return cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
 
 def convert_bgr_to_grey(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -278,7 +281,6 @@ def draw_image(image, image_to_draw, initial_coordinates):
 
 # Transformation methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-# TODO: Simplify?
 def resize(image, output_size=None, f=None):
     if f is None:
         return cv2.resize(image, output_size)
@@ -292,8 +294,19 @@ def crop_rectangle(image, initial_coordinates, final_coordinates, channels_last=
     else:
         return image[:, initial_coordinates[1]:final_coordinates[1], initial_coordinates[0]:final_coordinates[0]]
 
+# Transformation methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+# Other methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def blur(image, kernel_size):
     return cv2.blur(image, (kernel_size, kernel_size))
 
-# Transformation methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+def superimpose(img_1, img_2, w_1=0.35, w_2=0.65, gamma=0):
+    # Convert tensor to numpy, resize to the input size, cast to uint8, and superimpose img_1 on img_2
+    saliency_map = resize(img_1.cpu().detach().numpy(), output_size=(img_2.shape[1], img_2.shape[0]))
+    saliency_map = cv2.applyColorMap(np.clip(saliency_map * 255, 0, 255).astype(np.uint8), cv2.COLORMAP_JET)
+    return cv2.addWeighted(saliency_map, w_1, img_2, w_2, gamma)
+
+# Other methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
