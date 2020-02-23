@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-TODO: Write docstring.
+TODO: Write docstring
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.1"
+__version__ = "0.2"
 
 # External Libraries
 import numpy as np
@@ -179,13 +179,16 @@ class FERDemo:
         else:
             # Compute resize factor 'f'
             h, w, c = self._fer.input_image.shape
-            if h > w:
+            h_c, w_c, c_c = self._input_container.shape
+            h_ratio = h / h_c
+            w_ratio = w / w_c
+            if h_ratio > w_ratio:
                 if h < (self._container_height * FERDemo._INPUT_IMAGE_SCALE_MIN):
                     f = (self._container_height * FERDemo._INPUT_IMAGE_SCALE_MIN) / float(h)
                 else:
                     f = (self._container_height * FERDemo._INPUT_IMAGE_SCALE_MAX) / float(h)
             else:
-                if h < (self._container_height * FERDemo._INPUT_IMAGE_SCALE_MIN):
+                if w < (self._container_height * FERDemo._INPUT_IMAGE_SCALE_MIN):
                     f = (self._container_width * FERDemo._INPUT_IMAGE_SCALE_MIN) / float(w)
                 else:
                     f = (self._container_width * FERDemo._INPUT_IMAGE_SCALE_MAX) / float(w)
@@ -221,14 +224,30 @@ class FERDemo:
             else:
                 # Display ensemble and individual classifications
                 if self._display_individual_classification:
-                    # Ensemble
+                    # Resize face image
                     face_image = uimage.resize(self._fer.face_image, FERDemo._BLOCK_IMAGE_SIZE[self._screen_size])
+                    # Generate block of the ensemble prediction
                     block = self._generate_block(FERDemo._TEXT_ENSEMBLE, self._fer.list_emotion[-1], self._fer.list_affect[-1][0], self._fer.list_affect[-1][1], face_image=face_image, x=0, y=self._output_container_initial_position[1])
+                    # Draw block ot the ensemble prediction
                     uimage.draw_image(self._output_container, block, (0, 0))
 
                     # Branches
                     for branch in range(len(self._fer.list_emotion) - 1):
-                        block = self._generate_block(FERDemo._TEXT_BRANCH.format(branch + 1), self._fer.list_emotion[branch], self._fer.list_affect[branch][0], self._fer.list_affect[branch][1], self._fer.get_grad_cam(branch), x=self._output_block_height * (branch + 1), y=self._output_container_initial_position[1])
+                        # Superimpose saliency map on input face image
+                        grad_cam = self._fer.get_grad_cam(branch)
+                        if not (grad_cam is None):
+                            grad_cam = uimage.superimpose(grad_cam, face_image)
+
+                        # Generate block of the branch prediction
+                        block = self._generate_block(FERDemo._TEXT_BRANCH.format(branch + 1),
+                                                     self._fer.list_emotion[branch],
+                                                     self._fer.list_affect[branch][0],
+                                                     self._fer.list_affect[branch][1],
+                                                     grad_cam,
+                                                     x=self._output_block_height * (branch + 1),
+                                                     y=self._output_container_initial_position[1])
+
+                        # Draw block of the branch prediction
                         uimage.draw_image(self._output_container, block, (self._output_block_height * (branch + 1), 0))
                 # Display ensemble classification in detail
                 else:
@@ -411,7 +430,7 @@ class FERDemo:
     def update(self, fer):
         """
         Update screen.
-        :param fer: (model.esr.fer.FER) An FER object.
+        :param fer: (model.ml.fer.FER) An FER object.
         :return: void
         """
         self._fer = fer

@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-TODO: Write docstring.
+TODO: Write docstring
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.1"
+__version__ = "0.2"
 
 # Standard Libraries
 import argparse
@@ -25,7 +25,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
     Receives images from a camera and recognizes
     facial expressions of the closets face in a frame-based approach.
 
-    TODO: Write docstring.
+    TODO: Write docstring
     :param no_plot:
     :param camera_id:
     :param display:
@@ -56,7 +56,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
             # Get a frame
             image = uimage.get_frame()
 
-            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection)
+            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection, gradcam)
 
             # Display blank screen if no face is detected, otherwise,
             # display detected faces and perceived facial expression labels
@@ -81,7 +81,7 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
     Receives the full path to a image file and recognizes
     facial expressions of the closets face in a frame-based approach.
 
-    TODO: Write docstring.
+    TODO: Write docstring
 
     :param input_image_path:
     :param display:
@@ -96,7 +96,7 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
     image = uimage.read(input_image_path)
 
     # Call FER method
-    fer = cvision.recognize_facial_expression(image, device, face_detection)
+    fer = cvision.recognize_facial_expression(image, device, face_detection, gradcam)
 
     # TODO: Implement
     if output_csv_file:
@@ -115,7 +115,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
     Receives the full path to a video file and recognizes
     facial expressions of the closets face in a frame-based approach.
 
-    TODO: Write docstring.
+    TODO: Write docstring
 
     :param input_video_path:
     :param display:
@@ -146,7 +146,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
             # Get a frame
             image = uimage.get_frame()
 
-            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection)
+            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection, gradcam)
 
             # Display blank screen if no face is detected, otherwise,
             # display detected faces and perceived facial expression labels
@@ -207,8 +207,7 @@ def main():
     args = parser.parse_args()
 
     # Calls to main methods
-    # TODO: Double-check args. Many are missing.
-    # TODO: Double-check validation methods.
+    # TODO: Implement validation methods
     if args.mode == "image":
         try:
             cvalidation.validate_image_video_mode_arguments(args)

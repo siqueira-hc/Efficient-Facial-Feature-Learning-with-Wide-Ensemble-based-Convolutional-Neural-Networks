@@ -21,8 +21,7 @@ __license__ = "MIT license"
 __version__ = "0.2"
 
 # Standard libraries
-from os import path, makedirs
-import copy
+from os import path
 
 # External libraries
 import torch.nn.functional as F
@@ -130,9 +129,9 @@ class ConvolutionalBranch(nn.Module):
         This method is used to generate saliency maps with the Grad-CAM algorithm (Selvaraju et al., 2017).
 
         Reference:
-        Selvaraju, R.R., Cogswell, M., Das, A., Vedantam, R., Parikh, D. and Batra, D., 2017.
-        Grad-cam: Visual explanations from deep networks via gradient-based localization.
-        In Proceedings of the IEEE international conference on computer vision (pp. 618-626).
+            Selvaraju, R.R., Cogswell, M., Das, A., Vedantam, R., Parikh, D. and Batra, D., 2017.
+            Grad-cam: Visual explanations from deep networks via gradient-based localization.
+            In Proceedings of the IEEE international conference on computer vision (pp. 618-626).
 
         :param x_shared_representations: (ndarray) feature maps from shared layers
         :return: feature maps of the last convolutional layer
@@ -184,7 +183,7 @@ class ESR(nn.Module):
     INPUT_IMAGE_NORMALIZATION_MEAN = [0.0, 0.0, 0.0]
     INPUT_IMAGE_NORMALIZATION_STD = [1.0, 1.0, 1.0]
     # Path to saved network
-    PATH_TO_SAVED_NETWORK = "./model/esr/trained_models/esr_9"
+    PATH_TO_SAVED_NETWORK = "./model/ml/trained_models/esr_9"
     FILE_NAME_BASE_NETWORK = "Net-Base-Shared_Representations.pt"
     FILE_NAME_CONV_BRANCH = "Net-Branch_{}.pt"
 

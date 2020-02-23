@@ -14,12 +14,12 @@ This repository contains:
 - [Our AAAI-2020 poster](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020-Poster.pdf).
 
 #### Updates
+- **The Grad-CAM visualization algorithm has been implemented!** See [the image mode section](#facial-expression-recognition-in-images:-image-mode) to learn more about this new feature. 
 - Face detection algorithm has been improved!
 - The option to run facial expression recognition on GPU is now available. 
 
 # Facial Expression Recognition Framework
 ![Example of the output of the framework in the video mode without a plot](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/terminator.gif)
-
 
 The facial expression recognition framework can be started by running **main_esr9.py** followed by positional and optional arguments.
 
@@ -75,6 +75,22 @@ The argument **"image"** indicates that the input is an image. The location of t
 The framework should display the following image:
 
 ![Example of the output of the framework in the image mode](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/image_mode.png)
+
+You can also visualize regions in the image relevant for the classification of facial expression by adding -b -g as arguments:
+
+```
+python main_esr9.py image -i ./media/jackie.jpg -d -s 2 -b -g
+```
+
+The argument **-b** shows the classification of each branch and the argument **-g** generates saliency maps with the Grad-CAM algorithm.
+
+The framework should display the following image:
+
+![Example of the output of the framework in the image mode with Grad-CAM activated](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/grad_cam.png)
+
+Zoom in with the mouse wheel for better visualization:
+
+![Zoom-in image with Grad-CAM activated](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/grad_cam_zoom-in.png)
 
 #### Facial Expression Recognition in Videos: Video Mode
 To recognize a facial expression in videos, run the following command:
