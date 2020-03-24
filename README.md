@@ -145,7 +145,6 @@ Optional arguments:
 - **-np (--no_plot)**:
 	- Hides the graph of activation and (un)pleasant values.
 - **-fd (--face_detection)**:
-	- _**[On development]**_
 	- Defines the face detection algorithm:
 	    - 1. Optimized Dlib.
 	    - 2. Standard Dlib (King, 2009).
@@ -159,9 +158,8 @@ Optional arguments:
 	-  Sets the number of frames to be processed for each 30 frames. The lower is the number, the faster is the process.
 - **-o (--output)**:
 	- _**[On development]**_
-	- Saves ESR-9's outputs in a CSV file in the speficied location.
+	- Saves ESR-9's outputs in a CSV file in the specified location.
 - **-g (--gradcam)**:
-	- _**[On development]**_
 	- Runs the grad-CAM algorithm and shows the saliency maps with respect to each convolutional branch.
 
 ### Citation:
