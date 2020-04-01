@@ -193,7 +193,7 @@ def main():
                         type=str)
     parser.add_argument("-o", "--output",
                         help="create and write ESR-9's outputs to a CSV file. The file is saved in a folder defined "
-                             "by this argument (ex. '-o ./' save the file with the same name as the input file "
+                             "by this argument (ex. '-o ./' saves the file with the same name as the input file "
                              "in the working directory).",
                         type=str)
     parser.add_argument("-s", "--size",
