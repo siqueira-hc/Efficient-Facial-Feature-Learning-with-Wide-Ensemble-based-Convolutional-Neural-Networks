@@ -14,6 +14,11 @@ This repository contains:
 - [Our AAAI-2020 poster](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020-Poster.pdf).
 
 #### Updates
+
+- **You can now save predictions to a CSV file!** To test the new feature run the following command:
+```
+python main_esr9.py video -i ./media/terminator.mp4 -d -f 5 -s 3 -o ./test/
+```
 - **The Grad-CAM visualization algorithm has been implemented!** Click [here](#generating-saliency-maps-with-grad-cam) to learn more about this new feature.
 - Face detection algorithm has been improved!
 - The option to run facial expression recognition on GPU is now available. 
@@ -124,43 +129,43 @@ You can run python `main_esr9.py -h` or `python main_esr9.py -help` to display t
 
 Positional arguments:
 - **mode**:
-	- Selects the running mode of the demo which are 'image', 'video' or 'webcam'.
+	- Select the running mode of the demo which are 'image', 'video' or 'webcam'.
 	- Input values: {image, video, webcam}.
 
 Optional arguments:
 - **-h (--help)**:
-	- Displays the help message.
+	- Display the help message.
 - **-d (--display)**:
-	- Displays an window with the input data on the left and the output data on the rigth (i.e., detected face, emotions, and affect values).
+	- Display an window with the input data on the left and the output data on the rigth (i.e., detected face, emotions, and affect values).
 - **-i (--input)**:
-	- Defines the full path to an image or video.
+	- Define the full path to an image or video.
 - **-s (--size)**:
-	- Defines the size of the window:
+	- Define the size of the window:
 		1. 1920 x 1080.
 		2. 1440 x 900.
 		3. 1024 x 768.
 	- Input values: {1, 2, 3}.
 - **-b (--branch)**:
-	- Shows individual branch's classification.
+	- Show individual branch's classification.
 - **-np (--no_plot)**:
-	- Hides the graph of activation and (un)pleasant values.
+	- Hide the graph of activation and (un)pleasant values.
 - **-fd (--face_detection)**:
-	- Defines the face detection algorithm:
+	- Define the face detection algorithm:
 	    - 1. Optimized Dlib.
 	    - 2. Standard Dlib (King, 2009).
 	    - 3. Haar Cascade Classifiers (Viola and Jones, 2004).
 	- _Warning: the chosen algorithm may affect performance._
 - **-c (--cuda)**:
-	- Runs facial expression recognition on GPU.
+	- Run facial expression recognition on GPU.
 - **-w (--webcam)**:
-	-  Defines the webcam to be used while the framework is running by 'id' when the webcam mode is selected. The default camera is used, if 'id' is not specified.
+	-  Define the webcam to be used while the framework is running by 'id' when the webcam mode is selected. The default camera is used, if 'id' is not specified.
 - **-f (--frames)**:
-	-  Sets the number of frames to be processed for each 30 frames. The lower is the number, the faster is the process.
+	-  Set the number of frames to be processed for each 30 frames. The lower is the number, the faster is the process.
 - **-o (--output)**:
-	- _**[On development]**_
-	- Saves ESR-9's outputs in a CSV file in the specified location.
+	- Create and write ESR-9's outputs to a CSV file.
+	- The file is saved in a folder defined by this argument (ex. '-o ./' saves the file with the same name as the input file in the working directory).
 - **-g (--gradcam)**:
-	- Runs the grad-CAM algorithm and shows the saliency maps with respect to each convolutional branch.
+	- Run the grad-CAM algorithm and shows the saliency maps with respect to each convolutional branch.
 
 ### Citation:
 If you found our framework and/or paper useful, please, consider citing us:
