@@ -2,21 +2,31 @@
 # -*- coding: utf-8 -*-
 
 """
-TODO: Write docstring
+Main script of the facial expression recognition framework.
+
+It has three main features:
+
+Image: recognizes facial expressions in images.
+
+Video: recognizes facial expressions in videos in a frame-based approach.
+
+Webcam: connects to a webcam and recognizes facial expressions of the closest face detected
+by a face detection algorithm.
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.2"
+__version__ = "0.3"
 
 # Standard Libraries
 import argparse
 from argparse import RawTextHelpFormatter
+import time
 
 # Modules
 from controller import cvalidation, cvision
-from model.utils import uimage
+from model.utils import uimage, ufile
 from model.screen.fer_demo import FERDemo
 
 
@@ -24,20 +34,11 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
     """
     Receives images from a camera and recognizes
     facial expressions of the closets face in a frame-based approach.
-
-    TODO: Write docstring
-    :param no_plot:
-    :param camera_id:
-    :param display:
-    :param gradcam:
-    :param output_csv_file:
-    :param screen_size:
-    :param device:
-    :param frames:
-    :param branch:
-    :return:
     """
+
     fer_demo = None
+    write_to_file = not (output_csv_file is None)
+    starting_time = time.time()
 
     if not uimage.initialize_video_capture(camera_id):
         raise RuntimeError("Error on initializing video capture." +
@@ -48,15 +49,22 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
 
     # Initialize screen
     if display:
-        fer_demo = FERDemo(screen_size=screen_size, display_individual_classification=branch, display_graph_ensemble=(not no_plot))
+        fer_demo = FERDemo(screen_size=screen_size,
+                           display_individual_classification=branch,
+                           display_graph_ensemble=(not no_plot))
+    else:
+        print("Press 'Ctrl + C' to quit.")
 
     try:
+        if write_to_file:
+            ufile.create_file(output_csv_file, str(time.time()))
+
         # Loop to process each frame from a VideoCapture object.
         while uimage.is_video_capture_open() and ((not display) or (display and fer_demo.is_running())):
             # Get a frame
-            image = uimage.get_frame()
+            img, _ = uimage.get_frame()
 
-            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection, gradcam)
+            fer = None if (img is None) else cvision.recognize_facial_expression(img, device, face_detection, gradcam)
 
             # Display blank screen if no face is detected, otherwise,
             # display detected faces and perceived facial expression labels
@@ -64,70 +72,60 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
                 fer_demo.update(fer)
                 fer_demo.show()
 
-            # TODO: Implement
-            if output_csv_file:
-                pass
+            if write_to_file:
+                ufile.write_to_file(fer, time.time() - starting_time)
 
     except Exception as e:
         print("Error raised during video mode.")
         raise e
+    except KeyboardInterrupt as qe:
+        print("Keyboard interrupt event raised.")
     finally:
         uimage.release_video_capture()
-        fer_demo.quit()
+
+        if display:
+            fer_demo.quit()
+
+        if write_to_file:
+            ufile.close_file()
 
 
 def image(input_image_path, display, gradcam, output_csv_file, screen_size, device, branch, face_detection):
     """
     Receives the full path to a image file and recognizes
     facial expressions of the closets face in a frame-based approach.
-
-    TODO: Write docstring
-
-    :param input_image_path:
-    :param display:
-    :param gradcam:
-    :param output_csv_file:
-    :param screen_size:
-    :param device:
-    :param branch:
-    :return:
     """
 
-    image = uimage.read(input_image_path)
+    write_to_file = not (output_csv_file is None)
+    img = uimage.read(input_image_path)
 
     # Call FER method
-    fer = cvision.recognize_facial_expression(image, device, face_detection, gradcam)
+    fer = cvision.recognize_facial_expression(img, device, face_detection, gradcam)
 
-    # TODO: Implement
-    if output_csv_file:
-        pass
+    if write_to_file:
+        ufile.create_file(output_csv_file, input_image_path)
+        ufile.write_to_file(fer, 0.0)
+        ufile.close_file()
 
     if display:
-        fer_demo = FERDemo(screen_size=screen_size, display_individual_classification=branch, display_graph_ensemble=False)
+        fer_demo = FERDemo(screen_size=screen_size,
+                           display_individual_classification=branch,
+                           display_graph_ensemble=False)
         fer_demo.update(fer)
         while fer_demo.is_running():
             fer_demo.show()
         fer_demo.quit()
 
 
-def video(input_video_path, display, gradcam, output_csv_file, screen_size, device, frames, branch, no_plot, face_detection):
+def video(input_video_path, display, gradcam, output_csv_file, screen_size,
+          device, frames, branch, no_plot, face_detection):
     """
     Receives the full path to a video file and recognizes
     facial expressions of the closets face in a frame-based approach.
-
-    TODO: Write docstring
-
-    :param input_video_path:
-    :param display:
-    :param gradcam:
-    :param output_csv_file:
-    :param screen_size:
-    :param device:
-    :param frames:
-    :param branch:
-    :return:
     """
+
     fer_demo = None
+    write_to_file = not (output_csv_file is None)
 
     if not uimage.initialize_video_capture(input_video_path):
         raise RuntimeError("Error on initializing video capture." +
@@ -138,95 +136,119 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size, devi
 
     # Initialize screen
     if display:
-        fer_demo = FERDemo(screen_size=screen_size, display_individual_classification=branch, display_graph_ensemble=(not no_plot))
+        fer_demo = FERDemo(screen_size=screen_size,
+                           display_individual_classification=branch,
+                           display_graph_ensemble=(not no_plot))
 
     try:
+        if write_to_file:
+            ufile.create_file(output_csv_file, input_video_path)
+
         # Loop to process each frame from a VideoCapture object.
         while uimage.is_video_capture_open() and ((not display) or (display and fer_demo.is_running())):
             # Get a frame
-            image = uimage.get_frame()
+            img, timestamp = uimage.get_frame()
 
-            fer = None if (image is None) else cvision.recognize_facial_expression(image, device, face_detection, gradcam)
+            # Video has been processed
+            if img is None:
+                break
+            else:  # Process frame
+                fer = None if (img is None) else cvision.recognize_facial_expression(img,
+                                                                                     device,
+                                                                                     face_detection,
+                                                                                     gradcam)
 
-            # Display blank screen if no face is detected, otherwise,
-            # display detected faces and perceived facial expression labels
-            if display:
-                fer_demo.update(fer)
-                fer_demo.show()
+                # Display blank screen if no face is detected, otherwise,
+                # display detected faces and perceived facial expression labels
+                if display:
+                    fer_demo.update(fer)
+                    fer_demo.show()
 
-            # TODO: Implement
-            if output_csv_file:
-                pass
+                if write_to_file:
+                    ufile.write_to_file(fer, timestamp)
 
     except Exception as e:
         print("Error raised during video mode.")
         raise e
     finally:
         uimage.release_video_capture()
-        fer_demo.quit()
+
+        if display:
+            fer_demo.quit()
+
+        if write_to_file:
+            ufile.close_file()
 
 
 def main():
     # Parser
     parser = argparse.ArgumentParser(description='test', formatter_class=RawTextHelpFormatter)
-    parser.add_argument("mode", help="selects a method among 'image', 'video' or 'webcam' to run ESR-9.",
+    parser.add_argument("mode", help="select a method among 'image', 'video' or 'webcam' to run ESR-9.",
                         type=str, choices=["image", "video", "webcam"])
-    parser.add_argument("-d", "--display", help="displays the output of ESR-9.",
+    parser.add_argument("-d", "--display", help="display the output of ESR-9.",
                         action="store_true")
-    parser.add_argument("-g", "--gradcam", help="runs grad-CAM and displays the salience maps.",
+    parser.add_argument("-g", "--gradcam", help="run grad-CAM and displays the salience maps.",
                         action="store_true")
-    parser.add_argument("-i", "--input", help="defines the full path to an image or video.",
+    parser.add_argument("-i", "--input", help="define the full path to an image or video.",
                         type=str)
-    parser.add_argument("-o", "--output", help="saves ESR-9's outputs in a CSV file defined in 'output' (ex. ./output.csv).",
+    parser.add_argument("-o", "--output",
+                        help="create and write ESR-9's outputs to a CSV file. The file is saved in a folder defined "
+                             "by this argument (ex. '-o ./' save the file with the same name as the input file "
+                             "in the working directory).",
                         type=str)
     parser.add_argument("-s", "--size",
-                        help="defines the size of the window: \n1 - 1920 x 1080;\n2 - 1440 x 900;\n3 - 1024 x 768.",
+                        help="define the size of the window: \n1 - 1920 x 1080;\n2 - 1440 x 900;\n3 - 1024 x 768.",
                         type=int, choices=[1, 2, 3], default=1)
-    parser.add_argument("-c", "--cuda", help="runs on GPU.",
+    parser.add_argument("-c", "--cuda", help="run on GPU.",
                         action="store_true")
     parser.add_argument("-w", "--webcam_id",
-                        help="defines the webcam by 'id' to capture images in the webcam mode." +
+                        help="define the webcam by 'id' to capture images in the webcam mode." +
                              "If none is selected, the default camera by the OS is used.",
                         type=int, default=-1)
-    parser.add_argument("-f", "--frames", help="defines frames of videos and webcam captures.",
+    parser.add_argument("-f", "--frames", help="define frames of videos and webcam captures.",
                         type=int, default=5)
-    parser.add_argument("-b", "--branch", help="shows individual branch's classification if set true, otherwise," +
-                                               "shows final ensemble's classification.",
+    parser.add_argument("-b", "--branch", help="show individual branch's classification if set true, otherwise," +
+                                               "show final ensemble's classification.",
                         action="store_true", default=False)
     parser.add_argument("-np", "--no_plot", help="do not display activation and (un)pleasant graph",
                         action="store_true", default=False)
 
     parser.add_argument("-fd", "--face_detection",
-                        help="defines the face detection algorithm:" +
+                        help="define the face detection algorithm:" +
                              "\n1 - Optimized Dlib." +
                              "\n2 - Standard Dlib (King, 2009)." +
                              "\n3 - Haar Cascade Classifiers (Viola and Jones, 2004)." +
-                             "\n[Warning] Dlib is slower but accurate, whereas haar cascade is faster but less accurate",
+                             "\n[Warning] Dlib is slower but accurate, whereas haar cascade is faster "
+                             "but less accurate",
                         type=int, choices=[1, 2, 3], default=1)
 
     args = parser.parse_args()
 
     # Calls to main methods
-    # TODO: Implement validation methods
     if args.mode == "image":
         try:
             cvalidation.validate_image_video_mode_arguments(args)
-            image(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.branch, args.face_detection)
+            image(args.input, args.display, args.gradcam, args.output,
+                  args.size, args.cuda, args.branch, args.face_detection)
         except RuntimeError as e:
             print(e)
     elif args.mode == "video":
         try:
             cvalidation.validate_image_video_mode_arguments(args)
-            video(args.input, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
+            video(args.input, args.display, args.gradcam, args.output,
+                  args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
         except RuntimeError as e:
             print(e)
     elif args.mode == "webcam":
         try:
             cvalidation.validate_webcam_mode_arguments(args)
-            webcam(args.webcam_id, args.display, args.gradcam, args.output, args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
+            webcam(args.webcam_id, args.display, args.gradcam, args.output,
+                   args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
         except RuntimeError as e:
             print(e)
 
 
 if __name__ == "__main__":
+    print("Processing...")
     main()
+    print("Process has finished!")

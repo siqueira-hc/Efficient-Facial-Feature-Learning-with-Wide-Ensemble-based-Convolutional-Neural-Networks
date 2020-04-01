@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-TODO: Write docstring
+Facial Expression Recognition (FER) class.
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.2"
+__version__ = "0.3"
 
 
 class FER:
@@ -17,7 +17,8 @@ class FER:
     to be displayed on the screen such as an input image and ESR-9's outputs.
     """
 
-    def __init__(self, image=None, face_image=None, face_coordinates=None, list_emotion=None, list_affect=None, list_grad_cam=None):
+    def __init__(self, image=None, face_image=None, face_coordinates=None,
+                 list_emotion=None, list_affect=None, list_grad_cam=None):
         """
         Initialize FER object.
         :param image: (ndarray) input image.
