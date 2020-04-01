@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-This modules implements image processing methods.
+This module implements methods to handle datasets.
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.2"
+__version__ = "0.3"
 
 # External Libraries
 from torch.utils.data import Dataset
@@ -17,6 +17,18 @@ from torch.utils.data import Dataset
 # TODO: On development
 
 class AffectNetCategorical(Dataset):
+
+    def __init__(self):
+        pass
+
+    def __len__(self):
+        return 0
+
+    def __getitem__(self, idx):
+        return None
+
+    def _load(self):
+        pass
 
     @staticmethod
     def get_class(idx):

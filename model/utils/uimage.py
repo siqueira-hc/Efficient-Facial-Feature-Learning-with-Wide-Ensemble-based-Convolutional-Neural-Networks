@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-This modules implements image processing methods.
+This module implements image processing methods.
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.2"
+__version__ = "0.3"
 
 # Standard Libraries
 import os
@@ -33,12 +33,6 @@ def set_fps(fps):
 
 
 def is_video_capture_open():
-    """
-    TODO: Write docstring
-
-    :return:
-    """
-
     global _CAP
 
     if _CAP is None:
@@ -48,13 +42,6 @@ def is_video_capture_open():
 
 
 def initialize_video_capture(source):
-    """
-    TODO: Write docstring
-
-    :param source:
-    :return:
-    """
-
     global _CAP
 
     # If cap is not none, it re-initialize video capture with the new video file
@@ -77,10 +64,6 @@ def initialize_video_capture(source):
 
 
 def release_video_capture():
-    """
-    TODO: Write docstring
-    :return:
-    """
     global _CAP
 
     try:
@@ -95,10 +78,9 @@ def release_video_capture():
 
 def get_frame():
     """
-    TODO: Write docstring
-    Get a frame from the open video file.
+    Get a frame from a video file.
 
-    :return:
+    :return: (ndarray, float) (Loaded frame, time in seconds).
     """
     global _CAP, _FPS
 
@@ -123,7 +105,7 @@ def get_frame():
             print("Check whether working versions of ffmpeg or gstreamer is installed.")
             raise e
 
-    return to_return_frame
+    return to_return_frame, (_CAP.get(cv2.CAP_PROP_POS_MSEC) / 1000)
 
 
 def read(path_to_image, convert_to_grey_scale=False):

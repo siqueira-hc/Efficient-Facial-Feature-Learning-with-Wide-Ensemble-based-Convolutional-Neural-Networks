@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-TODO: Write docstring
+GUI of the facial expression recognition (FER) demo
 """
 
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.2"
+__version__ = "0.3"
 
 # External Libraries
 import numpy as np
@@ -22,6 +22,7 @@ class FERDemo:
     """
     This class implements the GUI of the facial expression recognition (FER) demo.
     """
+
     # Default values
     _DEFAULT_SCREEN_SIZE_ID = 1
     _DEFAULT_WINDOW_NAME = "Siqueira_et_al_AAAI_2020"
@@ -101,7 +102,7 @@ class FERDemo:
     _COLOUR_BGR_DARK_GREY = (50, 50, 50)
 
     # Messages
-    _TEXT_BLANK_INPUT = "No signal."
+    _TEXT_BLANK_INPUT = "No frame to process."
     _TEXT_NO_FACE = "No face has been detected."
     _TEXT_ENSEMBLE = "Ensemble:"
     _TEXT_BRANCH = "Branch {}:"
@@ -120,6 +121,7 @@ class FERDemo:
         :param window_name: (string) The name of the window
         :param screen_size: ((int, int)) Tuple of int values for width and height, respectively.
         """
+
         # Screen components
         self._fer = None
         self._input_image = None
@@ -204,7 +206,10 @@ class FERDemo:
             self._input_container[x:(x + h), y:(y + w), :] = self._input_image
 
     def _draw_output_container(self, is_blank):
-        self._output_container = self._get_container(0, self._output_container_initial_position[1], self._container_height, self._container_width)
+        self._output_container = self._get_container(0,
+                                                     self._output_container_initial_position[1],
+                                                     self._container_height,
+                                                     self._container_width)
 
         if is_blank:
             uimage.draw_text(self._output_container,
@@ -226,8 +231,16 @@ class FERDemo:
                 if self._display_individual_classification:
                     # Resize face image
                     face_image = uimage.resize(self._fer.face_image, FERDemo._BLOCK_IMAGE_SIZE[self._screen_size])
+
                     # Generate block of the ensemble prediction
-                    block = self._generate_block(FERDemo._TEXT_ENSEMBLE, self._fer.list_emotion[-1], self._fer.list_affect[-1][0], self._fer.list_affect[-1][1], face_image=face_image, x=0, y=self._output_container_initial_position[1])
+                    block = self._generate_block(FERDemo._TEXT_ENSEMBLE,
+                                                 self._fer.list_emotion[-1],
+                                                 self._fer.list_affect[-1][0],
+                                                 self._fer.list_affect[-1][1],
+                                                 face_image=face_image,
+                                                 x=0,
+                                                 y=self._output_container_initial_position[1])
+
                     # Draw block ot the ensemble prediction
                     uimage.draw_image(self._output_container, block, (0, 0))
 
