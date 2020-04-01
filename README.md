@@ -15,7 +15,7 @@ This repository contains:
 
 #### Updates
 
-- **You can now save predictions to a CSV file!** To test the new feature run the following command:
+- **You can now save predictions to a CSV file!** To test the new feature, run the following command:
 ```
 python main_esr9.py video -i ./media/terminator.mp4 -d -f 5 -s 3 -o ./test/
 ```
