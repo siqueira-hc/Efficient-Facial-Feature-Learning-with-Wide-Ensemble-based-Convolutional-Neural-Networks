@@ -195,7 +195,7 @@ In the scripts main_ck_plus.py, main_affectnet_discrete.py, main_affectnet_conti
 ## Training an ESR-4 on the Extended Cohn-Kanade Dataset
 To train ESR-4 (ESR with four convolutional branches. In our paper, it is referred as ESR-4 Lvl. 3 Frozen Layers.) on the Extended Cohn-Kanade dataset, run the script main_ck_plus.py. However, this script does not run out-of-the-box. To be able to run the main_ck_plus.py script, one shall download and organized the dataset into the following structure:
 
-<p>
+```
 Cohn-Kanade - Extended/
     cohn-kanade-images/
         S005/
@@ -211,7 +211,8 @@ Cohn-Kanade - Extended/
                     ...
                 ...
             ...
-</p>
+```
+
 The images in the folders must be pre-processed including cropping the face and rescaling to 96x96 pixels. For more details about the pre-processing and experiments on the Extended Cohn-Kanade, please, read [our AAAI-2020 paper](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020.pdf).
 
 After that, set the experimental variables including the base path to the dataset (base_path_to_dataset = "[...]/Cohn-Kanade - Extended/").
@@ -221,6 +222,7 @@ The Extended Cohn-Kanade dataset is available at [http://www.jeffcohn.net/Resour
 ## Discrete Emotion Perception: Training ESR-9 from scratch on the AffectNet Dataset
 To train ESR-9 on the AffectNet dataset for discrete emotion perception, run the script main_affectnet_discrete.py. However, this script does not run out-of-the-box. To be able to run the main_affectnet_discrete.py script, one shall download and organized the dataset into the following structure:
 
+```
 AffectNet/    
     Training_Labeled/
         0/
@@ -237,6 +239,7 @@ AffectNet/
         1/
         ...
         n/
+```
 
 The folder 0/, 1/, ..., /n contains up to 500 images from the AffectNet after pre-processing. To pre-process the images and organize them into the above structure, call the method pre_process_affect_net(base_path_to_images, base_path_to_annotations) from ./model/utils/udata.py. The images will be cropped (to get the face only), re-scaled to 96x96 pixels, and renamed to follow the pattern "[id]_[emotion_idx]_[valence times 1000]_[arousal times 1000].jpg".
 
@@ -252,16 +255,18 @@ The AffectNet dataset is available at [http://mohammadmahoor.com/affectnet/](htt
 ## Fine-tuning ESR-9 on the FER+ Dataset
 To fine-tune ESR-9 on the FER+ dataset, run the script main_fer_plus.py. However, this script does not run out-of-the-box. To be able to run the main_fer_plus.py script, one shall download and organized the dataset into the following structure:
 
+```
 FER_2013/
-----Dataset/
---------Images/
-------------FER2013Train/
-------------FER2013Valid/
-------------FER2013Test/
---------Labels/
-------------FER2013Train/
-------------FER2013Valid/
-------------FER2013Test/
+    Dataset/
+        Images/
+            FER2013Train/
+            FER2013Valid/
+            FER2013Test/
+        Labels/
+            FER2013Train/
+            FER2013Valid/
+            FER2013Test/
+```
 
 After that, set the experimental variables including the base path to the dataset (base_path_to_dataset = "[...]/FER_2013/Dataset/").
 
