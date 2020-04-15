@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Experiments on FER+ published at AAAI-20 (Siqueira et al., 2020).
+Experiments on AffectNet for discrete emotion perception published at AAAI-20 (Siqueira et al., 2020).
 
 Reference:
     Siqueira, H., Magg, S. and Wermter, S., 2020. Efficient Facial Feature Learning with Wide Ensemble-based
@@ -32,7 +32,6 @@ import copy
 
 # Modules
 from model.utils import udata, umath
-from model.ml.esr_9 import ESR
 
 
 class Base(nn.Module):
@@ -113,49 +112,22 @@ class Ensemble(nn.Module):
 
     @staticmethod
     def save(state_dicts, base_path_to_save_model, current_branch_save):
-        if not path.isdir(path.join(base_path_to_save_model, str(len(state_dicts) - 1 - current_branch_save))):
-            makedirs(path.join(base_path_to_save_model, str(len(state_dicts) - 1 - current_branch_save)))
+        if not path.isdir(path.join(base_path_to_save_model, str(current_branch_save))):
+            makedirs(path.join(base_path_to_save_model, str(current_branch_save)))
 
         torch.save(state_dicts[0],
                    path.join(base_path_to_save_model,
-                             str(len(state_dicts) - 1 - current_branch_save),
+                             str(current_branch_save),
                              "Net-Base-Shared_Representations.pt"))
 
         for i in range(1, len(state_dicts)):
             torch.save(state_dicts[i],
                        path.join(base_path_to_save_model,
-                                 str(len(state_dicts) - 1 - current_branch_save),
+                                 str(current_branch_save),
                                  "Net-Branch_{}.pt".format(i)))
 
         print("Network has been "
-              "saved at: {}".format(path.join(base_path_to_save_model,
-                                              str(len(state_dicts) - 1 - current_branch_save))))
-
-    @staticmethod
-    def load(device_to_load, ensemble_size):
-        # Load ESR-9
-        esr_9 = ESR(device_to_load)
-        loaded_model = Ensemble()
-        loaded_model.branches = []
-
-        # Load the base of the network
-        loaded_model.base = esr_9.base
-
-        # Load branches
-        for i in range(ensemble_size):
-            loaded_model_branch = Branch()
-            loaded_model_branch.conv1 = esr_9.convolutional_branches[i].conv1
-            loaded_model_branch.conv2 = esr_9.convolutional_branches[i].conv2
-            loaded_model_branch.conv3 = esr_9.convolutional_branches[i].conv3
-            loaded_model_branch.conv4 = esr_9.convolutional_branches[i].conv4
-            loaded_model_branch.bn1 = esr_9.convolutional_branches[i].bn1
-            loaded_model_branch.bn2 = esr_9.convolutional_branches[i].bn2
-            loaded_model_branch.bn3 = esr_9.convolutional_branches[i].bn3
-            loaded_model_branch.bn4 = esr_9.convolutional_branches[i].bn4
-            loaded_model_branch.fc = esr_9.convolutional_branches[i].fc
-            loaded_model.branches.append(loaded_model_branch)
-
-        return loaded_model
+              "saved at: {}".format(path.join(base_path_to_save_model, str(current_branch_save))))
 
     def to_state_dict(self):
         state_dicts = [copy.deepcopy(self.base.state_dict())]
@@ -264,13 +236,12 @@ def plot(his_loss, his_acc, his_val_loss, his_val_acc, branch_idx, base_path_his
 
 def main():
     # Experimental variables
-    base_path_experiment = "./experiments/FER_plus/"
-    name_experiment = "ESR_9-FER_Plus"
-    base_path_to_dataset = "[...]/FER_2013/Dataset/"
+    base_path_experiment = "./experiments/AffectNet_Discrete/"
+    name_experiment = "ESR_9-AffectNet_Discrete"
+    base_path_to_dataset = "[...]/AffectNet/"
     num_branches_trained_network = 9
     validation_interval = 2
-    max_training_epoch = 100
-    current_branch_on_training = 8
+    max_training_epoch = 50
 
     # Make dir
     if not path.isdir(path.join(base_path_experiment, name_experiment)):
@@ -290,43 +261,47 @@ def main():
     print("Starting: {}".format(str(name_experiment)))
     print("Running on {}".format(device))
 
-    # Load network trained on AffectNet
-    net = Ensemble.load(device, num_branches_trained_network)
+    # Initialize network
+    net = Ensemble()
 
-    # Send params to device
+    # Add first branch
+    net.add_branch()
+
+    # Send to running device
     net.to_device(device)
 
     # Set optimizer
-    optimizer = optim.SGD([{"params": net.base.parameters(), "lr": 0.1, "momentum": 0.9},
-                           {"params": net.branches[0].parameters(), "lr": 0.1, "momentum": 0.9}])
-    for b in range(1, net.get_ensemble_size()):
-        optimizer.add_param_group({"params": net.branches[b].parameters(), "lr": 0.02, "momentum": 0.9})
+    optimizer = optim.SGD([{'params': net.base.parameters(), 'lr': 0.1, 'momentum': 0.9},
+                           {'params': net.branches[-1].parameters(), 'lr': 0.1, 'momentum': 0.9}])
 
     # Define criterion
     criterion = nn.CrossEntropyLoss()
 
     # Load validation set
     # max_loaded_images_per_label=100000 loads the whole validation set
-    val_data = udata.FERplus(idx_set=1,
-                             max_loaded_images_per_label=100000,
-                             transforms=None,
-                             base_path_to_FER_plus=base_path_to_dataset)
+    val_data = udata.AffectNetCategorical(idx_set=2,
+                                          max_loaded_images_per_label=100000,
+                                          transforms=None,
+                                          is_norm_by_mean_std=False,
+                                          base_path_to_affectnet=base_path_to_dataset)
+
     val_loader = DataLoader(val_data, batch_size=32, shuffle=False, num_workers=8)
 
-    # Fine-tune ESR-9
+    # Train ESR-9
     for branch_on_training in range(num_branches_trained_network):
         # Load training data
-        train_data = udata.FERplus(idx_set=0,
-                                   max_loaded_images_per_label=5000,
-                                   transforms=transforms.Compose(data_transforms),
-                                   base_path_to_FER_plus=base_path_to_dataset)
+        train_data = udata.AffectNetCategorical(idx_set=0,
+                                                max_loaded_images_per_label=5000,
+                                                transforms=transforms.Compose(data_transforms),
+                                                is_norm_by_mean_std=False,
+                                                base_path_to_affectnet=base_path_to_dataset)
 
         # Best network
         best_ensemble = net.to_state_dict()
         best_ensemble_acc = 0.0
 
         # Initialize scheduler
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.75, last_epoch=-1)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.5, last_epoch=-1)
 
         # History
         history_loss = []
@@ -348,7 +323,7 @@ def main():
                 # Get the inputs
                 inputs, labels = inputs.to(device), labels.to(device)
 
-                # Set gradients to zero
+                # Zero the parameter gradients
                 optimizer.zero_grad()
 
                 # Forward
@@ -357,7 +332,7 @@ def main():
 
                 # Compute loss
                 loss = 0.0
-                for i_4 in range(net.get_ensemble_size() - current_branch_on_training):
+                for i_4 in range(net.get_ensemble_size()):
                     preds = confs_preds[i_4][1]
                     running_corrects[i_4] += torch.sum(preds == labels).cpu().numpy()
                     loss += criterion(outputs[i_4], labels)
@@ -373,24 +348,22 @@ def main():
                 running_updates += 1
 
             # Statistics
-            print("[Branch {:d}, Epochs {:d}--{:d}] "
-                  "Loss: {:.4f} Acc: {}".format(net.get_ensemble_size() - current_branch_on_training,
-                                                epoch + 1,
-                                                max_training_epoch,
-                                                running_loss / running_updates,
-                                                np.array(running_corrects) / len(train_data)))
+            print('[Branch {:d}, Epochs {:d}--{:d}] Loss: {:.4f} Acc: {}'.format(net.get_ensemble_size(),
+                                                                                 epoch + 1,
+                                                                                 max_training_epoch,
+                                                                                 running_loss / running_updates,
+                                                                                 np.array(running_corrects) / len(train_data)))
             # Validation
             if ((epoch % validation_interval) == 0) or ((epoch + 1) == max_training_epoch):
                 net.eval()
 
-                val_loss, val_corrects = evaluate(net, val_loader, criterion, device, current_branch_on_training)
+                val_loss, val_corrects = evaluate(net, val_loader, criterion, device)
 
-                print("\nValidation - [Branch {:d}, Epochs {:d}--{:d}] Loss: {:.4f} Acc: {}\n\n".format(
-                    net.get_ensemble_size() - current_branch_on_training,
-                    epoch + 1,
-                    max_training_epoch,
-                    val_loss[-1],
-                    np.array(val_corrects) / len(val_data)))
+                print('Validation - [Branch {:d}, Epochs {:d}--{:d}] Loss: {:.4f} Acc: {}'.format(net.get_ensemble_size(),
+                                                                                                  epoch + 1,
+                                                                                                  max_training_epoch,
+                                                                                                  val_loss[-1],
+                                                                                                  np.array(val_corrects) / len(val_data)))
 
                 # Add to history training and validation statistics
                 history_loss.append(running_loss / running_updates)
@@ -412,44 +385,37 @@ def main():
                     best_ensemble = net.to_state_dict()
 
                     # Save network
-                    Ensemble.save(best_ensemble,
-                                  path.join(base_path_experiment, name_experiment, "Saved Networks"),
-                                  current_branch_on_training)
+                    Ensemble.save(best_ensemble, path.join(base_path_experiment, name_experiment, 'Saved Networks'),
+                                  net.get_ensemble_size())
 
                 # Save graphs
-                plot(history_loss,
-                     history_acc,
-                     history_val_loss,
-                     history_val_acc,
-                     net.get_ensemble_size() - current_branch_on_training,
-                     path.join(base_path_experiment, name_experiment))
+                plot(history_loss, history_acc, history_val_loss, history_val_acc,
+                     net.get_ensemble_size(), path.join(base_path_experiment, name_experiment))
 
+                # Set network to training mode
                 net.train()
 
         # Change branch on training
-        if current_branch_on_training > 0:
-            # Decrease max training epoch
-            max_training_epoch = 60
+        if net.get_ensemble_size() < num_branches_trained_network:
+            # Decrease maximum training epoch
+            max_training_epoch = 20
 
             # Reload best configuration
             net.reload(best_ensemble)
 
+            # Add branch
+            net.add_branch()
+
+            # Send params to device
+            net.to_device(device)
+
             # Set optimizer
-            optimizer = optim.SGD([{"params": net.base.parameters(), "lr": 0.02, "momentum": 0.9},
-                                   {"params": net.branches[
-                                       net.get_ensemble_size() - current_branch_on_training].parameters(),
-                                    "lr": 0.1,
-                                    "momentum": 0.9
-                                    }])
-            # Trained branches
-            for b in range(net.get_ensemble_size()):
-                if b != (net.get_ensemble_size() - current_branch_on_training):
-                    optimizer.add_param_group({"params": net.branches[b].parameters(), "lr": 0.02, "momentum": 0.9})
+            optimizer = optim.SGD([{'params': net.base.parameters(), 'lr': 0.01, 'momentum': 0.9},
+                                   {'params': net.branches[-1].parameters(), 'lr': 0.1, 'momentum': 0.9}])
+            for b in range(net.get_ensemble_size() - 1):
+                optimizer.add_param_group({'params': net.branches[b].parameters(), 'lr': 0.01, 'momentum': 0.9})
 
-            # Change branch on training
-            current_branch_on_training -= 1
-
-        # Finish training after fine-tuning all branches
+        # Finish training after training all branches
         else:
             break
 
