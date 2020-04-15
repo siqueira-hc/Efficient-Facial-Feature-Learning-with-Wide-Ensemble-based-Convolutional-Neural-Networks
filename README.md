@@ -252,15 +252,15 @@ The AffectNet dataset is available at [http://mohammadmahoor.com/affectnet/](htt
 To fine-tune ESR-9 on the FER+ dataset, run the script main_fer_plus.py. However, this script does not run out-of-the-box. To be able to run the main_fer_plus.py script, one shall download and organized the dataset into the following structure:
 
 FER_2013/
-    Dataset/
-        Images/
-            FER2013Train/
-            FER2013Valid/
-            FER2013Test/
-        Labels/
-            FER2013Train/
-            FER2013Valid/
-            FER2013Test/
+----Dataset/
+--------Images/
+------------FER2013Train/
+------------FER2013Valid/
+------------FER2013Test/
+--------Labels/
+------------FER2013Train/
+------------FER2013Valid/
+------------FER2013Test/
 
 After that, set the experimental variables including the base path to the dataset (base_path_to_dataset = "[...]/FER_2013/Dataset/").
 
