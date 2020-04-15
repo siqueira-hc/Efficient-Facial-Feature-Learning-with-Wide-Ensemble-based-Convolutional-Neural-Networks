@@ -18,7 +18,7 @@ Reference:
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.3"
+__version__ = "1.0"
 
 # Standard libraries
 from os import path
@@ -198,17 +198,22 @@ class ESR(nn.Module):
 
         # Base of ESR-9 as described in the docstring (see mark 1)
         self.base = Base()
-        self.base.load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK, ESR.FILE_NAME_BASE_NETWORK), map_location=device))
+        self.base.load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
+                                                       ESR.FILE_NAME_BASE_NETWORK),
+                                             map_location=device))
         self.base.to(device)
 
         # Load 9 convolutional branches that composes ESR-9 as described in the docstring (see mark 2)
         self.convolutional_branches = []
         for i in range(1, len(self) + 1):
             self.convolutional_branches.append(ConvolutionalBranch())
-            self.convolutional_branches[-1].load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK, ESR.FILE_NAME_CONV_BRANCH.format(i)), map_location=device))
+            self.convolutional_branches[-1].load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
+                                                                                 ESR.FILE_NAME_CONV_BRANCH.format(i)),
+                                                                       map_location=device))
             self.convolutional_branches[-1].to(device)
 
         self.to(device)
+
         # Evaluation mode on
         self.eval()
 

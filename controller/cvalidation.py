@@ -8,7 +8,7 @@ This module validates users' inputs.
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.3"
+__version__ = "1.0"
 
 
 def is_none(x):

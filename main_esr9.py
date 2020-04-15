@@ -17,7 +17,7 @@ by a face detection algorithm.
 __author__ = "Henrique Siqueira"
 __email__ = "siqueira.hc@outlook.com"
 __license__ = "MIT license"
-__version__ = "0.3"
+__version__ = "1.0"
 
 # Standard Libraries
 import argparse
