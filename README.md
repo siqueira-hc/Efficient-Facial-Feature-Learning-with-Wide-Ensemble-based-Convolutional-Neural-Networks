@@ -195,6 +195,7 @@ In the scripts main_ck_plus.py, main_affectnet_discrete.py, main_affectnet_conti
 ## Training an ESR-4 on the Extended Cohn-Kanade Dataset
 To train ESR-4 (ESR with four convolutional branches. In our paper, it is referred as ESR-4 Lvl. 3 Frozen Layers.) on the Extended Cohn-Kanade dataset, run the script main_ck_plus.py. However, this script does not run out-of-the-box. To be able to run the main_ck_plus.py script, one shall download and organized the dataset into the following structure:
 
+<p>
 Cohn-Kanade - Extended/
     cohn-kanade-images/
         S005/
@@ -210,7 +211,7 @@ Cohn-Kanade - Extended/
                     ...
                 ...
             ...
-
+</p>
 The images in the folders must be pre-processed including cropping the face and rescaling to 96x96 pixels. For more details about the pre-processing and experiments on the Extended Cohn-Kanade, please, read [our AAAI-2020 paper](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/Siqueira-AAAI_2020.pdf).
 
 After that, set the experimental variables including the base path to the dataset (base_path_to_dataset = "[...]/Cohn-Kanade - Extended/").
