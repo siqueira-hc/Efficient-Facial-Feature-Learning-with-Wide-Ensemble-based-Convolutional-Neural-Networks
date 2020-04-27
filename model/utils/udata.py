@@ -692,8 +692,22 @@ def _generate_single_file_name(img_id, expression, valence, arousal):
     return '%07ds%ds%ds%d.jpg' % (img_id, expression, valence, arousal)
 
 
-def pre_process_affect_net(base_path_to_images, base_path_to_annotations):
-    set_index = 2
+def pre_process_affect_net(base_path_to_images, base_path_to_annotations, set_index):
+    """
+    Pre-process the AffectNet dataset. Faces are cropped and resized to 96 x 96 pixels.
+    The images are organized in folders with 500 images each. The test set had not been released
+    when this experiment was carried out.
+
+    :param base_path_to_images: (string) Path to images.
+    :param base_path_to_annotations: (string) Path to annotations.
+    :param set_index: (int = {0, 1, 2}) set_index = 0 process the automatically annotated images.
+                                        set_index = 1 process the manually annotated images: training set.
+                                        set_index = 2 process the manually annotated images: validation set.
+    :return: (void)
+    """
+
+    assert ((set_index < 3) and (set_index >= 0)), "set_index must be 0, 1 or 2."
+
     annotation_folders = ['Automatically_Annotated_Images/', 'Manually_Annotated_Images/',
                           'Manually_Annotated_Images/']
     destination_set_folders = ['AffectNet/Training_Unlabeled/', 'AffectNet/Training_Labeled/',
