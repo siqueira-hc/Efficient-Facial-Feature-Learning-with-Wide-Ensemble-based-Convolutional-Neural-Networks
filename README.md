@@ -130,10 +130,10 @@ To recognize a facial expression in images captured from a webcam, run the follo
 
 
 ```
-python main_esr9.py webcam -d -s 2 -b
+python main_esr9.py webcam -w 0 -d -s 2 -b
 ```
 
-The argument **"webcam"** indicates the framework to capture images from a webcam. **-d** sets the display mode to true, **-s 2** sets the window size to 1440 x 900, and **-b** changes the default interface to show individual classification from each convolutional branch as follows:
+The argument **"webcam"** indicates the framework to capture images from a webcam. **-w 0** tells the program to use the camera 0 (usually the default, corresponds to the built-in webcam on your machine), **-d** sets the display mode to true, **-s 2** sets the window size to 1440 x 900, and **-b** changes the default interface to show individual classification from each convolutional branch as follows:
 
 ![Example of the output of the framework in the webcam mode](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/webcam_mode.png)
 
