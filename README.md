@@ -30,19 +30,33 @@ The facial expression recognition framework can be started by running **main_esr
 ## Getting Started
 ### Installation
 1. Install python 3.6.
+2. (Optional but recommended) Create a virtual environment for the installation and activate it (using Anaconda Prompt):
+```
+conda create --name your_env_name python=3.6
+conda activate your_env_name
+```
+
 2. Install dependencies by running:
 
 ```
-pip install -r requirements.txt
+pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 Main python libraries used in our framework:
-- matplotlib 3.0.3
-- numpy 1.17.4
-- opencv-python 4.1.2.30
-- Pillow 5.0.0
-- torch 1.0.0
-- torchvision 0.2.1
+- matplotlib 3.2.1
+- numpy 1.18.5
+- opencv-python 4.2.0.34
+- Pillow 7.1.2
+- torch 1.5.0+cpu
+- torchvision 0.6.0+cpu
+
+Note: if your system has CUDA you may get better performance by installing the GPU-enabled version of torch and torchvision instead. But regardless, the CPU version should still work. If you want to do that, go to pytorch.org to determine which version of torch and torchvision you should install. Remember to delete the lines
+```
+torch==1.5.0+cpu
+torchvision==0.6.0+cpu
+```
+in requirements.txt before running the ```pip install``` command above. Then, run the command that pytorch.org gave you to install GPU-enabled torch and torchvision.
+
 
 ### Features
 The facial expression recognition framework has three main features:
