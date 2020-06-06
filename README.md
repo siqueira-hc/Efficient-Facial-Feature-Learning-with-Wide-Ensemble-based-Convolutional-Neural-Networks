@@ -50,7 +50,7 @@ Main python libraries used in our framework:
 - torch 1.5.0+cpu
 - torchvision 0.6.0+cpu
 
-Note: if your system has CUDA you may get better performance by installing the GPU-enabled version of torch and torchvision instead. But regardless, the CPU version should still work. If you want to do that, go to pytorch.org to determine which version of torch and torchvision you should install. Remember to delete the lines
+Note: if your system has CUDA, you may get better performance by installing the GPU-enabled version of torch and torchvision instead. But regardless, the CPU version should still work. If you want to do that, go to pytorch.org to determine which version of torch and torchvision you should install. Remember to delete the lines
 ```
 torch==1.5.0+cpu
 torchvision==0.6.0+cpu
