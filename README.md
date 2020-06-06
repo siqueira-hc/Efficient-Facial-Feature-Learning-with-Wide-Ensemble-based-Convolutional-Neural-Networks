@@ -36,7 +36,7 @@ conda create --name your_env_name python=3.6
 conda activate your_env_name
 ```
 
-2. Install dependencies by running:
+2. Change directories to wherever this project was installed. Then, install dependencies by running:
 
 ```
 pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
