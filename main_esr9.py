@@ -23,6 +23,7 @@ __version__ = "1.0"
 import argparse
 from argparse import RawTextHelpFormatter
 import time
+import os
 
 # Modules
 from controller import cvalidation, cvision
@@ -41,6 +42,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
     starting_time = time.time()
 
     if not uimage.initialize_video_capture(camera_id):
+        print("this is where I failed!")
         raise RuntimeError("Error on initializing video capture." +
                            "\nCheck whether a webcam is working or not." +
                            "In linux, you can use Cheese for testing.")
@@ -106,6 +108,13 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
         ufile.create_file(output_csv_file, input_image_path)
         ufile.write_to_file(fer, 0.0)
         ufile.close_file()
+        fer_demo = FERDemo(screen_size=screen_size,
+                           display_individual_classification=branch,
+                           display_graph_ensemble=False)
+        fer_demo.update(fer)
+        # while fer_demo.is_running():
+        fer_demo.save()
+        fer_demo.quit()
 
     if display:
         fer_demo = FERDemo(screen_size=screen_size,
@@ -180,11 +189,35 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size,
             ufile.close_file()
 
 
+def eval_video(input_video_path, display, gradcam, output_dir, screen_size,
+               device, frames, branch, no_plot, face_detection):
+    """
+    Receives the full path to a video evaluation folder and recognizes
+    facial expressions of the closest face in a frame-based approach.
+    """
+    write_to_file = not (output_dir is None)
+
+    # for each folder in input_video_path, and for each file in that folder, 
+    # process the video file and store the output csv in a relevant location.
+    
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+    
+    for emotion_dir in os.listdir(input_video_path):
+        if os.path.isdir(os.path.join(input_video_path, emotion_dir)):
+            for filename in os.listdir(os.path.join(input_video_path, emotion_dir)):
+                eval_path = os.path.join(input_video_path, emotion_dir, filename)
+                print("Input path is: " + eval_path)
+                video(eval_path, display, gradcam, output_dir, screen_size, device, frames, branch,
+                    no_plot, face_detection)
+    return None
+
+
 def main():
     # Parser
     parser = argparse.ArgumentParser(description='test', formatter_class=RawTextHelpFormatter)
     parser.add_argument("mode", help="select a method among 'image', 'video' or 'webcam' to run ESR-9.",
-                        type=str, choices=["image", "video", "webcam"])
+                        type=str, choices=["image", "video", "webcam", "eval_image", "eval_video"])
     parser.add_argument("-d", "--display", help="display the output of ESR-9.",
                         action="store_true")
     parser.add_argument("-g", "--gradcam", help="run grad-CAM and displays the salience maps.",
@@ -244,6 +277,13 @@ def main():
             cvalidation.validate_webcam_mode_arguments(args)
             webcam(args.webcam_id, args.display, args.gradcam, args.output,
                    args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
+        except RuntimeError as e:
+            print(e)
+    elif args.mode == "eval_video":
+        try:
+            cvalidation.validate_image_video_mode_arguments(args)
+            eval_video(args.input, args.display, args.gradcam, args.output,
+                       args.size, args.cuda, args.frames, args.branch, args.no_plot, args.face_detection)
         except RuntimeError as e:
             print(e)
 
