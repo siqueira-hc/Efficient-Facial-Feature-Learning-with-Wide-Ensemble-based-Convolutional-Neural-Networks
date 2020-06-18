@@ -127,7 +127,7 @@ def image(input_image_path, display, gradcam, output_csv_file, screen_size, devi
 
 
 def video(input_video_path, display, gradcam, output_csv_file, screen_size,
-          device, frames, branch, no_plot, face_detection):
+          device, frames, branch, no_plot, face_detection, emotion_cat=""):
     """
     Receives the full path to a video file and recognizes
     facial expressions of the closets face in a frame-based approach.
@@ -151,7 +151,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size,
 
     try:
         if write_to_file:
-            ufile.create_file(output_csv_file, input_video_path)
+            ufile.create_file(output_csv_file, input_video_path, emotion_cat)
 
         # Loop to process each frame from a VideoCapture object.
         while uimage.is_video_capture_open() and ((not display) or (display and fer_demo.is_running())):
@@ -208,8 +208,9 @@ def eval_video(input_video_path, display, gradcam, output_dir, screen_size,
             for filename in os.listdir(os.path.join(input_video_path, emotion_dir)):
                 eval_path = os.path.join(input_video_path, emotion_dir, filename)
                 print("Input path is: " + eval_path)
+                emotion_cat = emotion_dir[:2]
                 video(eval_path, display, gradcam, output_dir, screen_size, device, frames, branch,
-                    no_plot, face_detection)
+                    no_plot, face_detection, emotion_cat)
     return None
 
 
