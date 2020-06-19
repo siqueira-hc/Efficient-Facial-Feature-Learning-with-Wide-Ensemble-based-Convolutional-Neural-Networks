@@ -21,8 +21,8 @@ def eval_frame(predictions_dir, emotion_dict):
     """
     Evaluate the predictions of the model on an evaluation dataset, frame by frame. 
     """
-    emotion_to_num = {"happy": 0, "sad": 1, "neutral": 2, "surprise": 3,
-                      "anger": 4, "fear": 5, "disgust": 6, "contempt": 7}
+    emotion_to_num = {"neutral": 0, "happy": 1, "sad": 2, "surprise": 3,
+                     "fear": 4, "disgust": 5,  "anger": 6, "contempt": 7}
     labels, preds = [], []
     for filename in os.listdir(predictions_dir):
         if filename.endswith(".csv"):
@@ -55,8 +55,8 @@ def eval_video(predictions_dir, emotion_dict):
     Evaluate the predictions of the model taking a video as a whole. 
     For now, we consider majority emotion through the video as the prediction. 
     """
-    emotion_to_num = {"happy": 0, "sad": 1, "neutral": 2, "surprise": 3,
-                      "anger": 4, "fear": 5, "disgust": 6, "contempt": 7}
+    emotion_to_num = {"neutral": 0, "happy": 1, "sad": 2, "surprise": 3,
+                     "fear": 4, "disgust": 5,  "anger": 6, "contempt": 7}
     labels, preds = [], []
     for filename in os.listdir(predictions_dir):
         if filename.endswith(".csv"):
@@ -80,6 +80,8 @@ def eval_video(predictions_dir, emotion_dict):
                     pred_nums[pred_emotion_num] += 1
             if len(pred_nums.keys()) == 0:
                 continue
+
+            # Pick the maximum frequency emotion as the prediction for this video. 
             prediction = max(pred_nums.items(), key=operator.itemgetter(1))[0]
             preds.append(prediction)
             labels.append(emotion_num)
