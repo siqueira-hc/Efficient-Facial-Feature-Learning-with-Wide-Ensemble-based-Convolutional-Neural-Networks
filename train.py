@@ -30,6 +30,7 @@ def evaluate(val_model_eval, val_loader_eval, val_criterion_eval, device_to_proc
     running_val_corrects = [0 for _ in range(val_model_eval.get_ensemble_size() + 1)]
     running_val_steps = [0 for _ in range(val_model_eval.get_ensemble_size())]
 
+    labels_all, preds_all = [], []
     for inputs_eval, labels_eval in val_loader_eval:
         inputs_eval, labels_eval = inputs_eval.to(device_to_process), labels_eval.to(device_to_process)
         outputs_eval = val_model_eval(inputs_eval)
@@ -51,12 +52,14 @@ def evaluate(val_model_eval, val_loader_eval, val_criterion_eval, device_to_proc
         # Compute accuracy of ensemble predictions
         _, preds_eval = torch.max(overall_preds, 1)
         running_val_corrects[-1] += torch.sum(preds_eval == labels_eval).cpu().numpy()
+        labels_all.extend(labels_eval)
+        preds_all.extend(preds_eval)
 
     for b_eval in range(val_model_eval.get_ensemble_size()):
         div = running_val_steps[b_eval] if running_val_steps[b_eval] != 0 else 1
         running_val_loss[b_eval] /= div
 
-    return running_val_loss, running_val_corrects
+    return running_val_loss, running_val_corrects, labels_all, preds_all
 
 
 def main():
@@ -186,7 +189,7 @@ def main():
             if ((epoch % validation_interval) == 0) or ((epoch + 1) == max_training_epoch):
                 net.eval()
 
-                val_loss, val_corrects = evaluate(net, val_loader, criterion, device, current_branch_on_training)
+                val_loss, val_corrects, _, _ = evaluate(net, val_loader, criterion, device, current_branch_on_training)
 
                 print("\nValidation - [Branch {:d}, Epochs {:d}--{:d}] Loss: {:.4f} Acc: {}\n\n".format(
                     net.get_ensemble_size() - current_branch_on_training,
@@ -247,6 +250,7 @@ def main():
         # Finish training after fine-tuning all branches
         else:
             break
+    
 
 
 if __name__ == '__main__':

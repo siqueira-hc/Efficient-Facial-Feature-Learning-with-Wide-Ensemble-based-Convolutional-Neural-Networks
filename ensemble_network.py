@@ -113,7 +113,7 @@ class Ensemble(nn.Module):
     @staticmethod
     def load(device_to_load, ensemble_size, load_path=None):
         # Load ESR-9
-        if not path:       
+        if not load_path:       
             esr_9 = ESR(device_to_load, load_path)
         loaded_model = Ensemble()
         loaded_model.branches = []

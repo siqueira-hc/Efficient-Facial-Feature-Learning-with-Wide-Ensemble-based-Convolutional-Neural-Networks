@@ -15,10 +15,16 @@ import pandas as pd
 import numpy as np
 import cv2
 from sklearn.metrics import classification_report
+from torch.utils.data import DataLoader
+import torch.nn as nn
+import torch
 
 # Modules
-from model.utils import uimage, ufile
+from model.utils import uimage, ufile, udata
 from controller import cvision
+from train import evaluate
+from ensemble_network import Ensemble
+from model.ml.esr_9 import ESR
 
 
 def eval_frame(predictions_dir, emotion_dict):
@@ -63,23 +69,24 @@ def eval_forward_frame(data_dir, emotion_dict, img_type='npy'):
     emotion_to_num = {"neutral": 0, "happy": 1, "sad": 2, "surprise": 3,
                      "fear": 4, "disgust": 5,  "anger": 6, "contempt": 7}
     labels, preds = [], []
-    for emotion_dir in os.listdir(data_dir)[:1]:
-        for img_npy in os.listdir(os.path.join(data_dir, emotion_dir)):
-            # Get the ground truth emotion label 
-            emotion_label = emotion_dict[emotion_dir[:2]]
-            emotion_num = emotion_to_num[emotion_label]
 
-            # Read the image and predict facial expression.
-            if img_type == 'npy':
-                img = np.load(os.path.join(data_dir, emotion_dir, img_npy))
-            elif img_type == 'jpg' or img_type == 'png':
-                img = cv2.imread(os.path.join(data_dir, emotion_dir, img_npy))
-            # The second argument is False since we are currently testing on CPU
-            emotion, affect, emotion_idx = cvision.recognize_face_image_expression(img, False)
-            # print(emotion, emotion_idx)
-            ensemble_prediction = emotion_idx[-1]
-            labels.append(emotion_num)
-            preds.append(ensemble_prediction)
+    val_data = udata.Sample(idx_set=1,
+                            max_loaded_images_per_label=1000,
+                            transforms=None,
+                            base_path_to_sample=data_dir)
+
+    val_loader = DataLoader(val_data, batch_size=16, shuffle=False, num_workers=8)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    criterion = nn.CrossEntropyLoss()
+    net = Ensemble.load(device, 9, load_path=None)
+    net.to_device(device)
+
+    val_loss, val_corrects, labels, preds = evaluate(
+        net, val_loader, criterion, device, current_branch_on_training_val=0)
+
+    print("\nValidation - Loss: {:.4f} Acc: {}\n\n".format(
+        val_loss[-1],
+        np.array(val_corrects) / len(val_data)))
     print(classification_report(labels, preds))
 
 
@@ -137,13 +144,14 @@ def main():
 
     emotion_dict = {"ha": "happy", "sa": "sad", "ne": "neutral", "su": "surprise",
                     "an": "anger", "fe": "fear", "di": "disgust", "co": "contempt"}
-    if args.forward.lower().strip() == "true":
+    if args.forward.lower().strip() == "true" and "self_data" in args.predictions:
         eval_forward_frame(args.predictions, emotion_dict)
         return 
     if args.eval_mode == "frame":
         eval_frame(args.predictions, emotion_dict)
     elif args.eval_mode == "video":
         eval_video(args.predictions, emotion_dict)
+
 
 if __name__ == "__main__":
     main()
