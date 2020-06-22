@@ -22,9 +22,9 @@ from ensemble_network import Ensemble
 
 
 def main():
-    base_path_experiment = "./experiments/sample/"
+    base_path_experiment = "./experiments/self_data/"
     name_experiment = "ESR_9-sample"
-    base_path_to_dataset = "./sample_dataset/"
+    base_path_to_dataset = "./self_data/"
     num_branches_trained_network = 9
     validation_interval = 2
     max_training_epoch = 2
@@ -69,7 +69,7 @@ def main():
                             max_loaded_images_per_label=1000,
                             transforms=None,
                             base_path_to_sample=base_path_to_dataset)
-    val_loader = DataLoader(val_data, batch_size=1, shuffle=False, num_workers=8)
+    val_loader = DataLoader(val_data, batch_size=4, shuffle=False, num_workers=8)
 
     # Fine-tune ESR-9
     for branch_on_training in range(num_branches_trained_network):
@@ -94,7 +94,7 @@ def main():
 
         # Training branch
         for epoch in range(max_training_epoch):
-            train_loader = DataLoader(train_data, batch_size=2, shuffle=True, num_workers=8)
+            train_loader = DataLoader(train_data, batch_size=16, shuffle=True, num_workers=8)
 
             running_loss = 0.0
             running_corrects = [0.0 for _ in range(net.get_ensemble_size())]
