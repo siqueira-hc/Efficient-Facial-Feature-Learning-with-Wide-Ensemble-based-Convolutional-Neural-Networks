@@ -187,7 +187,7 @@ class ESR(nn.Module):
     FILE_NAME_BASE_NETWORK = "Net-Base-Shared_Representations.pt"
     FILE_NAME_CONV_BRANCH = "Net-Branch_{}.pt"
 
-    def __init__(self, device):
+    def __init__(self, device, load_path=None):
         """
         Loads ESR-9.
 
@@ -198,7 +198,10 @@ class ESR(nn.Module):
 
         # Base of ESR-9 as described in the docstring (see mark 1)
         self.base = Base()
-        self.base.load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
+        if not load_path:
+            load_path = ESR.PATH_TO_SAVED_NETWORK
+
+        self.base.load_state_dict(torch.load(path.join(load_path,
                                                        ESR.FILE_NAME_BASE_NETWORK),
                                              map_location=device))
         self.base.to(device)
@@ -207,7 +210,7 @@ class ESR(nn.Module):
         self.convolutional_branches = []
         for i in range(1, len(self) + 1):
             self.convolutional_branches.append(ConvolutionalBranch())
-            self.convolutional_branches[-1].load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
+            self.convolutional_branches[-1].load_state_dict(torch.load(path.join(load_path,
                                                                                  ESR.FILE_NAME_CONV_BRANCH.format(i)),
                                                                        map_location=device))
             self.convolutional_branches[-1].to(device)

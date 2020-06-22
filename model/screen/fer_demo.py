@@ -456,6 +456,9 @@ class FERDemo:
     def show(self):
         cv2.imshow(self._window_name, self._screen)
 
+    def save(self):
+        cv2.imwrite("new_image.jpg", self._screen)
+        
     def is_running(self):
         return (cv2.waitKey(1) != 27) and (cv2.getWindowProperty(self._window_name, cv2.WND_PROP_VISIBLE) >= 1)
 

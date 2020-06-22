@@ -26,7 +26,7 @@ _HEADER += "\n"
 _FILE = None
 
 
-def create_file(directory, file_name):
+def create_file(directory, file_name, emotion_cat=""):
     global _FILE
 
     if not (_FILE is None) and not _FILE.closed:
@@ -40,6 +40,10 @@ def create_file(directory, file_name):
         name = name.split(".")[0] + ".csv"
 
         full_path = os.path.join(directory, name)
+
+        if len(emotion_cat) > 0:
+            emotion_cat = emotion_cat[:2] + "_"
+            full_path = os.path.join(directory, emotion_cat + name)
 
         _FILE = open(full_path, "w")
         _FILE.write(_HEADER)

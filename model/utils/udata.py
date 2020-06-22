@@ -679,6 +679,158 @@ class CohnKanade(Dataset):
 
 # Exteded Cohn-Kanade <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+# Sample Dataset >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+class Sample(Dataset):
+    def __init__(self, idx_set=0, max_loaded_images_per_label=1000, transforms=None, base_path_to_sample=None):
+        """
+            :param idx_set: Labeled = 0, Validation = 1, Test = 2
+            :param max_loaded_images_per_label: Maximum number of images per label
+            :param transforms: transforms (callable, optional): Optional transform to be applied on a sample.
+        """
+
+        self.idx_set = idx_set
+        self.max_loaded_images_per_label = max_loaded_images_per_label
+        self.transforms = transforms
+        self.base_path_to_sample = base_path_to_sample
+        self.fer_sets = {0: 'train', 1: 'val', 2: 'test'}
+
+        # Default values
+        self.num_labels = 8
+        self.mean = [0.0, 0.0, 0.0]
+        self.std = [1.0, 1.0, 1.0]
+
+        # Load data
+        self.loaded_data = self._load()
+        print('Size of the loaded set: {}'.format(self.loaded_data[0].shape[0]))
+
+    def __len__(self):
+        return self.loaded_data[0].shape[0]
+
+    def __getitem__(self, idx):
+        sample = {'image': self.loaded_data[0][idx], 'emotion': self.loaded_data[1][idx]}
+        sample['image'] = Image.fromarray(sample['image'])
+
+        if not (self.transforms is None):
+            sample['image'] = self.transforms(sample['image'])
+
+        return Normalize(mean=self.mean, std=self.std)(ToTensor()(sample['image'])), sample['emotion']
+
+    def online_normalization(self, x):
+        return Normalize(mean=self.mean, std=self.std)(ToTensor()(x))
+
+    def norm_input_to_orig_input(self, x):
+        x_r = torch.zeros(x.size())
+        x_r[0] = (x[2] * self.std[2]) + self.mean[2]
+        x_r[1] = (x[1] * self.std[1]) + self.mean[1]
+        x_r[2] = (x[0] * self.std[0]) + self.mean[0]
+        return x_r
+
+    @staticmethod
+    def get_class(idx):
+        classes = {
+            0: 'Neutral',
+            1: 'Happy',
+            2: 'Sad',
+            3: 'Surprise',
+            4: 'Fear',
+            5: 'Disgust',
+            6: 'Anger',
+            7: 'Contempt'}
+
+        return classes[idx]
+
+    def _load(self):
+        """ 
+        New load function, which doesn't require the images to be organized in folders 
+        corresponding to which set they are a part of (train, val or test). 
+        Uses a CSV file to spell that out. 
+        """
+        csv_label = []
+        data, labels = [], []
+        counter_loaded_images_per_label = [0 for _ in range(self.num_labels)]
+
+        # path_folders_images = path.join(self.base_path_to_sample, 'Images', self.fer_sets[self.idx_set])
+        path_labels = path.join(self.base_path_to_sample, self.fer_sets[self.idx_set] + "_data.csv")
+
+        with open(path_labels) as csvfile:
+            lines = csv.reader(csvfile)
+            i = 0
+            for row in lines:
+                i += 1
+                # print(row)
+                if i == 1:
+                    continue
+                csv_label.append(row)
+
+        # Shuffle training set
+        if self.idx_set == 0:
+            np.random.shuffle(csv_label)
+
+        for l in csv_label:
+            # emotion_raw = list(map(float, l[2:len(l)]))
+            emotion = l[3]
+
+            if (int(emotion) < self.num_labels) and (counter_loaded_images_per_label[int(emotion)] < self.max_loaded_images_per_label):
+                counter_loaded_images_per_label[int(emotion)] += 1
+                img = np.load(l[1])
+                # img = np.array(uimage.read(l[0]), np.uint8)
+                img = uimage.resize(img, (96, 96))
+
+                data.append(img)
+                labels.append(int(emotion))
+
+            has_loading_finished = (np.sum(counter_loaded_images_per_label) >= (self.max_loaded_images_per_label * self.num_labels))
+
+            if has_loading_finished:
+                break
+
+        return [np.array(data), np.array(labels)]
+
+    def _old_load(self):
+        csv_label = []
+        data, labels = [], []
+        counter_loaded_images_per_label = [0 for _ in range(self.num_labels)]
+
+        path_folders_images = path.join(self.base_path_to_sample, 'Images', self.fer_sets[self.idx_set])
+        path_folders_labels = path.join(self.base_path_to_sample, 'Labels', self.fer_sets[self.idx_set])
+
+        with open(path_folders_labels + '/label.csv') as csvfile:
+            lines = csv.reader(csvfile)
+            i = 0
+            for row in lines:
+                i += 1
+                # print(row)
+                if i == 1:
+                    continue
+                csv_label.append(row)
+
+        # Shuffle training set
+        if self.idx_set == 0:
+            np.random.shuffle(csv_label)
+
+        for l in csv_label:
+            # emotion_raw = list(map(float, l[2:len(l)]))
+            emotion = l[1]
+
+            if (int(emotion) < self.num_labels) and (counter_loaded_images_per_label[int(emotion)] < self.max_loaded_images_per_label):
+                counter_loaded_images_per_label[int(emotion)] += 1
+
+                img = np.array(uimage.read(path.join(path_folders_images, l[0])), np.uint8)
+
+                # Have to edit from here. 
+                img = uimage.resize(img, (96, 96))
+
+                data.append(img)
+                labels.append(int(emotion))
+
+            has_loading_finished = (np.sum(counter_loaded_images_per_label) >= (self.max_loaded_images_per_label * self.num_labels))
+
+            if has_loading_finished:
+                break
+
+        return [np.array(data), np.array(labels)]
+
 
 # Other methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

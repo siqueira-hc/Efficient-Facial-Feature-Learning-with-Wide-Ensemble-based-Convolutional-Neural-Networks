@@ -131,6 +131,23 @@ def recognize_facial_expression(image, on_gpu, face_detection_method, grad_cam):
 
     return to_return_fer
 
+
+def recognize_face_image_expression(image, on_gpu):
+    """
+    Given an image with just a face (face detection has already been performed on the image), 
+    detect the facial expression and return without invoking the GUI. 
+    """
+    device = torch.device("cuda" if on_gpu else "cpu")
+    # Pre_process detected face
+    input_face = _pre_process_input_image(image)
+    input_face = input_face.to(device)
+
+    # Recognize facial expression
+    # emotion_idx is needed to run Grad-CAM
+    emotion, affect, emotion_idx = _predict(input_face, device)
+    
+    return emotion, affect, emotion_idx
+
 # Public methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
