@@ -86,8 +86,10 @@ def main():
     print("Starting: {}".format(str(name_experiment)))
     print("Running on {}".format(device))
 
-    # Load network trained on AffectNet
-    net = Ensemble.load(device, num_branches_trained_network)
+    # Load network trained on AffectNet - 
+    # load_path can indicate the path where the network needs to be loaded from.
+    load_path = None
+    net = Ensemble.load(device, num_branches_trained_network, load_path)
 
     # Send params to device
     net.to_device(device)

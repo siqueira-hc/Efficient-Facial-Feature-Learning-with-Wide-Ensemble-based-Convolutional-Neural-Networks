@@ -63,7 +63,6 @@ def eval_forward_frame(data_dir, emotion_dict, img_type='npy'):
     emotion_to_num = {"neutral": 0, "happy": 1, "sad": 2, "surprise": 3,
                      "fear": 4, "disgust": 5,  "anger": 6, "contempt": 7}
     labels, preds = [], []
-
     for emotion_dir in os.listdir(data_dir)[:1]:
         for img_npy in os.listdir(os.path.join(data_dir, emotion_dir)):
             # Get the ground truth emotion label 

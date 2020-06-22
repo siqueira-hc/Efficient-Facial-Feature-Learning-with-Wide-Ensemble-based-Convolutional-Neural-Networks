@@ -111,9 +111,10 @@ class Ensemble(nn.Module):
                                               str(len(state_dicts) - 1 - current_branch_save))))
 
     @staticmethod
-    def load(device_to_load, ensemble_size):
+    def load(device_to_load, ensemble_size, load_path=None):
         # Load ESR-9
-        esr_9 = ESR(device_to_load)
+        if not path:       
+            esr_9 = ESR(device_to_load, load_path)
         loaded_model = Ensemble()
         loaded_model.branches = []
 
