@@ -3,6 +3,8 @@
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-facial-feature-learning-with-wide/facial-expression-recognition-on-fer)](https://paperswithcode.com/sota/facial-expression-recognition-on-fer?p=efficient-facial-feature-learning-with-wide)
 
+**The trained model cannot be used for commercial purposes!**
+
 This repository contains:
 - Facial expression recognition framework.
 - Introduction to Ensembles with Shared Representations.
