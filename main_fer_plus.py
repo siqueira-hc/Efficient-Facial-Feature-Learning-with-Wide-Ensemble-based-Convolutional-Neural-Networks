@@ -312,7 +312,7 @@ def main():
                              transforms=None,
                              base_path_to_FER_plus=base_path_to_dataset)
     val_loader = DataLoader(val_data, batch_size=32, shuffle=False, num_workers=8)
-
+    
     # Fine-tune ESR-9
     for branch_on_training in range(num_branches_trained_network):
         # Load training data
