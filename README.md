@@ -32,19 +32,33 @@ The facial expression recognition framework can be started by running **main_esr
 ## Getting Started
 ### Installation
 1. Install python 3.6.
-2. Install dependencies by running:
+2. (Optional but recommended) Create a virtual environment for the installation and activate it (using Anaconda Prompt):
+```
+conda create --name your_env_name python=3.6
+conda activate your_env_name
+```
+
+2. Change directories to wherever this project was installed. Then, install dependencies by running:
 
 ```
-pip install -r requirements.txt
+pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 Main python libraries used in our framework:
-- matplotlib 3.0.3
-- numpy 1.17.4
-- opencv-python 4.1.2.30
-- Pillow 5.0.0
-- torch 1.0.0
-- torchvision 0.2.1
+- matplotlib 3.2.1
+- numpy 1.18.5
+- opencv-python 4.2.0.34
+- Pillow 7.1.2
+- torch 1.5.0+cpu
+- torchvision 0.6.0+cpu
+
+Note: if your system has CUDA, you may get better performance by installing the GPU-enabled version of torch and torchvision instead. But regardless, the CPU version should still work. If you want to do that, go to pytorch.org to determine which version of torch and torchvision you should install. Remember to delete the lines
+```
+torch==1.5.0+cpu
+torchvision==0.6.0+cpu
+```
+in requirements.txt before running the ```pip install``` command above. Then, run the command that pytorch.org gave you to install GPU-enabled torch and torchvision.
+
 
 ### Features
 The facial expression recognition framework has three main features:
@@ -118,10 +132,10 @@ To recognize a facial expression in images captured from a webcam, run the follo
 
 
 ```
-python main_esr9.py webcam -d -s 2 -b
+python main_esr9.py webcam -w 0 -d -s 2 -b
 ```
 
-The argument **"webcam"** indicates the framework to capture images from a webcam. **-d** sets the display mode to true, **-s 2** sets the window size to 1440 x 900, and **-b** changes the default interface to show individual classification from each convolutional branch as follows:
+The argument **"webcam"** indicates the framework to capture images from a webcam. **-w 0** tells the program to use camera 0 (usually the default, corresponds to the built-in webcam on your machine), **-d** sets the display mode to true, **-s 2** sets the window size to 1440 x 900, and **-b** changes the default interface to show individual classification from each convolutional branch as follows:
 
 ![Example of the output of the framework in the webcam mode](https://github.com/siqueira-hc/Efficient-Facial-Feature-Learning-with-Wide-Ensemble-based-Convolutional-Neural-Networks/blob/master/media/webcam_mode.png)
 
