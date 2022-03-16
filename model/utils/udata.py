@@ -726,6 +726,7 @@ def pre_process_affect_net(base_path_to_images, base_path_to_annotations, base_d
         try:
             # Read image
             img_file_name = annotation_file.get('subDirectory_filePath')[line]
+            img_file_name = img_file_name.split("/")[-1]
             img_full_path = path.join(base_path_to_images, annotation_folders[set_index], img_file_name)
             img = uimage.read(img_full_path)
 
