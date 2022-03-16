@@ -707,6 +707,7 @@ def pre_process_affect_net(base_path_to_images, base_path_to_annotations, base_d
     :return: (void)
     """
 
+    print('preprocessing started')
     assert ((set_index < 3) and (set_index >= 0)), "set_index must be 0, 1 or 2."
 
     annotation_folders = ['Automatically_Annotated_Images/', 'Manually_Annotated_extracted/',
@@ -721,6 +722,7 @@ def pre_process_affect_net(base_path_to_images, base_path_to_annotations, base_d
     num_images_per_folder = 500
 
     annotation_file = pandas.read_csv(path.join(base_path_to_annotations, annotation_file_names[set_index]))
+    print('annotation file loaded')
 
     for line in range(image_id, annotation_file.shape[0]):
         try:
