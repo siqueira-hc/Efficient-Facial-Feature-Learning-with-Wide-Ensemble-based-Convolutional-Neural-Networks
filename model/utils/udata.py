@@ -760,4 +760,5 @@ def pre_process_affect_net(base_path_to_images, base_path_to_annotations, base_d
 base_path_to_images = '/mnt/archive/common/datasets/facial_datasets/AffectNet'
 base_path_to_annotations = '/mnt/archive/common/datasets/facial_datasets/AffectNet/Manually_Annotated_file_lists'
 base_destination_path = '~/FER_data/AffectNet'
-pre_process_affect_net(base_path_to_images, base_path_to_annotations)
+pre_process_affect_net(base_path_to_images=base_path_to_images, base_path_to_annotations=base_path_to_annotations,
+                       base_destination_path=base_destination_path)
