@@ -301,7 +301,7 @@ def main():
     # Experimental variables
     base_path_experiment = "./experiments/AffectNet_Continuous/"
     name_experiment = "ESR_9-AffectNet_Continuous"
-    base_path_to_dataset = "/media/siqueira/Siqueira/Henrique/Datasets/AffectNet/"
+    base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
     max_training_epoch = 2
@@ -352,7 +352,7 @@ def main():
     # Fine-tune ESR-9
     for branch_on_training in range(num_branches_trained_network):
         # Load training data
-        train_data = udata.AffectNetDimensional(idx_set=0,
+        train_data = udata.AffectNetDimensional(idx_set=1,  # it was 0
                                                 max_loaded_images_per_label=5000,
                                                 transforms=transforms.Compose(data_transforms),
                                                 is_norm_by_mean_std=False,
