@@ -352,7 +352,7 @@ def main():
     # Fine-tune ESR-9
     for branch_on_training in range(num_branches_trained_network):
         # Load training data
-        train_data = udata.AffectNetDimensional(idx_set=1,  # it was 0
+        train_data = udata.AffectNetDimensional(idx_set=0,
                                                 max_loaded_images_per_label=5000,
                                                 transforms=transforms.Compose(data_transforms),
                                                 is_norm_by_mean_std=False,
