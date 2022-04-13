@@ -301,12 +301,12 @@ def plot(his_loss, his_val_loss_valence, his_val_loss_arousal, branch_idx, base_
 def main():
     # Experimental variables
     base_path_experiment = "./experiments/AffectNet_Continuous/"
-    name_experiment = "ESR_9-AffectNet_Continuous"
+    name_experiment = "ESR_9-AffectNet_Continuous_debug"
     base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
     max_training_epoch = 2
-    current_branch_on_training = 8  # what does this mean? it only trains the last branch?
+    current_branch_on_training = 8  # it starts from branch 8 (last branch) and trains all the branches step by step
 
     # Make dir
     if not path.isdir(path.join(base_path_experiment, name_experiment)):
