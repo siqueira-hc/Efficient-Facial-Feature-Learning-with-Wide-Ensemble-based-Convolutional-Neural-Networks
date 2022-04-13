@@ -303,11 +303,11 @@ def plot(his_loss, his_val_loss_valence, his_val_loss_arousal, branch_idx, base_
 def main():
     # Experimental variables
     base_path_experiment = "./experiments/AffectNet_Continuous/"
-    name_experiment = "ESR_9-AffectNet_Continuous_debug"
+    name_experiment = "ESR_9-AffectNet_Continuous_debug_100epochs"
     base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
-    max_training_epoch = 2
+    max_training_epoch = 100  # it was 2
     current_branch_on_training = 8  # it starts from branch 8 (last branch) and trains all the branches step by step
 
     # Make dir
@@ -461,7 +461,7 @@ def main():
         # Change branch on training
         if current_branch_on_training > 0:
             # Decrease max epoch
-            max_training_epoch = 2  # I commented out
+            # max_training_epoch = 2  # I commented out
 
             # Reload best configuration
             net.reload(best_ensemble)
