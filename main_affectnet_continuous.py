@@ -34,6 +34,8 @@ import copy
 from model.utils import udata, umath
 from model.ml.esr_9 import ESR
 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 
 class Base(nn.Module):
     def __init__(self):
