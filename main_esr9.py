@@ -92,7 +92,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
 
 def image(input_image_path, display, gradcam, output_csv_file, screen_size, device, branch, face_detection):
     """
-    Receives the full path to a image file and recognizes
+    Receives the full path to an image file and recognizes
     facial expressions of the closets face in a frame-based approach.
     """
 

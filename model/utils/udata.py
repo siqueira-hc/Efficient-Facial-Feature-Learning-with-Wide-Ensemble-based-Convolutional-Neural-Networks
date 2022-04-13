@@ -710,7 +710,7 @@ def pre_process_affect_net(base_path_to_images, base_path_to_annotations, base_d
     print('preprocessing started')
     assert ((set_index < 3) and (set_index >= 0)), "set_index must be 0, 1 or 2."
 
-    annotation_folders = ['Automatically_Annotated_Images/', 'Manually_Annotated_extracted/',
+    annotation_folders = ['Automatically_Annotated_extracted/', 'Manually_Annotated_extracted/',
                           'Manually_Annotated_extracted/']
     destination_set_folders = ['Training_Unlabeled/', 'Training_Labeled/',
                                'Validation/']

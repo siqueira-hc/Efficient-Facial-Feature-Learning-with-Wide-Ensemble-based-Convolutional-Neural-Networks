@@ -66,16 +66,16 @@ class Branch(nn.Module):
         self.conv1 = nn.Conv2d(128, 128, 3, 1)
         self.conv2 = nn.Conv2d(128, 256, 3, 1)
         self.conv3 = nn.Conv2d(256, 256, 3, 1)
-        self.conv4 = nn.Conv2d(256, 512, 3, 1, 1)
+        self.conv4 = nn.Conv2d(256, 512, 3, 1, 1)       # what is the 5th dimension?
 
         self.bn1 = nn.BatchNorm2d(128)
         self.bn2 = nn.BatchNorm2d(256)
         self.bn3 = nn.BatchNorm2d(256)
         self.bn4 = nn.BatchNorm2d(512)
 
-        self.fc = nn.Linear(512, 8)
+        self.fc = nn.Linear(512, 8)     # this is for discrete emotion recognition
 
-        self.fc_dimensional = nn.Linear(8, 2)
+        self.fc_dimensional = nn.Linear(8, 2)   # this is for valence-arousal estimation
 
         self.pool = nn.MaxPool2d(2, 2)
         self.global_pool = nn.AdaptiveAvgPool2d(1)
@@ -116,7 +116,7 @@ class Ensemble(nn.Module):
         return y
 
     @staticmethod
-    def save(state_dicts, base_path_to_save_model, current_branch_save):
+    def save(state_dicts, base_path_to_save_model, current_branch_save):    # here it makes different folders. it makes 9 folders because it trains 9 branches (train is performed 9 times) and each time it saves the parameters of all the branches
         if not path.isdir(path.join(base_path_to_save_model, str(len(state_dicts) - 1 - current_branch_save))):
             makedirs(path.join(base_path_to_save_model, str(len(state_dicts) - 1 - current_branch_save)))
 
@@ -138,12 +138,12 @@ class Ensemble(nn.Module):
     @staticmethod
     def load(device_to_load, ensemble_size):
         # Load ESR-9
-        esr_9 = ESR(device_to_load)
+        esr_9 = ESR(device_to_load)     # its constructor makes a model with a base and 9 branches and loads the pretrained weights for them
         loaded_model = Ensemble()
         loaded_model.branches = []
 
         # Load the base of the network
-        loaded_model.base = esr_9.base
+        loaded_model.base = esr_9.base  # it the base arch with pre-trained weights loaded
 
         # Base no trainable
         for p in loaded_model.base.conv1.parameters():
@@ -224,7 +224,7 @@ class Ensemble(nn.Module):
 
 def evaluate(val_model_eval, val_loader_eval, val_criterion_eval, device_to_process, current_branch_on_training_val=0):
     cpu_device = torch.device('cpu')
-    val_predictions = [[] for _ in range(val_model_eval.get_ensemble_size() + 1)]
+    val_predictions = [[] for _ in range(val_model_eval.get_ensemble_size() + 1)]  # one list for each branch! so we will have 9 lists of predictions and 1 list for the ensemble result (so 10 lists in total)
     val_targets_valence = []
     val_targets_arousal = []
 
@@ -233,27 +233,28 @@ def evaluate(val_model_eval, val_loader_eval, val_criterion_eval, device_to_proc
         labels_eval_valence = labels_eval[:, 0].view(len(labels_eval[:, 0]), 1)
         labels_eval_arousal = labels_eval[:, 1].view(len(labels_eval[:, 1]), 1)
 
-        outputs_eval = val_model_eval(inputs_eval)
-        outputs_eval = outputs_eval[:val_model_eval.get_ensemble_size() - current_branch_on_training_val]
+        outputs_eval = val_model_eval(inputs_eval)  # 9 lists of size n*2 each
+        outputs_eval = outputs_eval[:val_model_eval.get_ensemble_size() - current_branch_on_training_val]  # only keep the output of branches which have been training
 
         # Ensemble prediction
-        val_predictions_ensemble = torch.zeros(outputs_eval[0].size()).to(cpu_device)
+        val_predictions_ensemble = torch.zeros(outputs_eval[0].size()).to(cpu_device)  # size is n*2 (size of one of the lists)
 
         for evaluate_branch in range(val_model_eval.get_ensemble_size() - current_branch_on_training_val):
 
             outputs_eval_cpu = outputs_eval[evaluate_branch].detach().to(cpu_device)
 
             val_predictions[evaluate_branch].extend(outputs_eval_cpu)
-            val_predictions_ensemble += outputs_eval_cpu
+            val_predictions_ensemble += outputs_eval_cpu    # so the output of all the branches are summed up
 
-        val_predictions[-1].extend(val_predictions_ensemble / (val_model_eval.get_ensemble_size() - current_branch_on_training_val))
+        val_predictions[-1].extend(val_predictions_ensemble / (val_model_eval.get_ensemble_size() - current_branch_on_training_val))  # the mean of ensemble output is placed in the last position of val_prediction
 
         val_targets_valence.extend(labels_eval_valence)
         val_targets_arousal.extend(labels_eval_arousal)
 
     val_targets_valence = torch.stack(val_targets_valence)
     val_targets_arousal = torch.stack(val_targets_arousal)
-    evaluate_val_losses = [[], []]
+
+    evaluate_val_losses = [[], []]  # valence, arousal (2 lists , each have 10 values, 1-9 for branch losses and 10 for ensemble loss)
     for evaluate_branch in range(val_model_eval.get_ensemble_size() + 1):
         if (evaluate_branch < (val_model_eval.get_ensemble_size() - current_branch_on_training_val)) or (evaluate_branch == val_model_eval.get_ensemble_size()):
             list_tensor = torch.stack(val_predictions[evaluate_branch])
@@ -270,13 +271,13 @@ def evaluate(val_model_eval, val_loader_eval, val_criterion_eval, device_to_proc
     return evaluate_val_losses
 
 
-def plot(his_loss, his_val_loss, his_val_loss_arousal, branch_idx, base_path_his):
+def plot(his_loss, his_val_loss_valence, his_val_loss_arousal, branch_idx, base_path_his):
     losses_plot = [[range(len(his_loss)), his_loss]]
     legends_plot_loss = ['Training']
 
     # Loss
-    for b_plot in range(len(his_val_loss)):
-        losses_plot.append([range(len(his_val_loss[b_plot])), his_val_loss[b_plot]])
+    for b_plot in range(len(his_val_loss_valence)):
+        losses_plot.append([range(len(his_val_loss_valence[b_plot])), his_val_loss_valence[b_plot]])
         legends_plot_loss.append('Validation ({}) (Val)'.format(b_plot + 1))
 
         losses_plot.append([range(len(his_val_loss_arousal[b_plot])), his_val_loss_arousal[b_plot]])
@@ -293,7 +294,7 @@ def plot(his_loss, his_val_loss, his_val_loss_arousal, branch_idx, base_path_his
                limits_axis_y=(0.2, 0.6, 0.025))
 
     np.save(path.join(base_path_his, 'Loss_Branch_{}'.format(branch_idx)), np.array(his_loss))
-    np.save(path.join(base_path_his, 'Loss_Val_Branch_{}_Valence'.format(branch_idx)), np.array(his_val_loss))
+    np.save(path.join(base_path_his, 'Loss_Val_Branch_{}_Valence'.format(branch_idx)), np.array(his_val_loss_valence))
     np.save(path.join(base_path_his, 'Loss_Val_Branch_{}_Arousal'.format(branch_idx)), np.array(his_val_loss_arousal))
 
 
@@ -304,8 +305,8 @@ def main():
     base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
-    max_training_epoch = 20 #it was 2
-    current_branch_on_training = 8
+    max_training_epoch = 2
+    current_branch_on_training = 8  # what does this mean? it only trains the last branch?
 
     # Make dir
     if not path.isdir(path.join(base_path_experiment, name_experiment)):
@@ -344,8 +345,8 @@ def main():
     # max_loaded_images_per_label=100000 loads the whole validation set
     val_data = udata.AffectNetDimensional(idx_set=2,
                                           max_loaded_images_per_label=100000,
-                                          transforms=None,
-                                          is_norm_by_mean_std=False,
+                                          transforms=None,  # why None? only train data is transformed? is it okay?
+                                          is_norm_by_mean_std=False,    # why False?
                                           base_path_to_affectnet=base_path_to_dataset)
     val_loader = DataLoader(val_data, batch_size=32, shuffle=False, num_workers=8)
 
@@ -364,8 +365,8 @@ def main():
 
         # History
         history_loss = []
-        history_val_loss_valence = [[] for _ in range(net.get_ensemble_size() + 1)]
-        history_val_loss_arousal = [[] for _ in range(net.get_ensemble_size() + 1)]
+        history_val_loss_valence = [[] for _ in range(net.get_ensemble_size() + 1)]  # one list for each branch + 1 for ensemble (10 in total)
+        history_val_loss_arousal = [[] for _ in range(net.get_ensemble_size() + 1)]  # one list for each branch + 1 for ensemble (10 in total)
 
         # Training branch
         for epoch in range(max_training_epoch):
@@ -387,7 +388,7 @@ def main():
                 optimizer.zero_grad()
 
                 # Forward
-                outputs = net(inputs)
+                outputs = net(inputs)   # a list of 9 (ensemble_size) output arrays (9 * n*2), one array for each branch
 
                 # Compute loss
                 loss = 0.0
@@ -423,8 +424,8 @@ def main():
                 history_loss.append(running_loss / running_updates)
 
                 for b in range(net.get_ensemble_size()):
-                    history_val_loss_valence[b].append(val_loss[0][b])
-                    history_val_loss_arousal[b].append(val_loss[1][b])
+                    history_val_loss_valence[b].append(val_loss[0][b])  # we keep history loss for each branch which includes the loss values for all the epochs. val_loss keeps the loss for the current epoch and history_val_loss keeps the loss for all the epochs
+                    history_val_loss_arousal[b].append(val_loss[1][b])  # so if we have for example 20 epochs in total, we have 20 values for each branch (20 for valence and 20 for arousal).
 
                 # Add ensemble rmse to history
                 history_val_loss_valence[-1].append(val_loss[0][-1])
@@ -436,7 +437,7 @@ def main():
                     max_training_epoch,
                     [hvlv[-1] for hvlv in history_val_loss_valence],
                     [hvla[-1] for hvla in history_val_loss_arousal]
-                ))
+                ))   # for each branch, it prints the last value which is for the latest epoch! so it prints 10 values for valence and 10 for arousal! (for each branch it has num_epochs values in total)
 
                 # Save best ensemble
                 ensemble_rmse = float(history_val_loss_valence[-1][-1]) + float(history_val_loss_arousal[-1][-1])
@@ -458,7 +459,7 @@ def main():
         # Change branch on training
         if current_branch_on_training > 0:
             # Decrease max epoch
-            # max_training_epoch = 2 # I commented out
+            max_training_epoch = 2  # I commented out
 
             # Reload best configuration
             net.reload(best_ensemble)
