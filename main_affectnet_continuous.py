@@ -308,7 +308,7 @@ def main():
     base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
-    max_training_epoch = 100  # it was 2
+    max_training_epoch = 2  # it was 2
     current_branch_on_training = 8  # it starts from branch 8 (last branch) and trains all the branches step by step
 
     # Make dir
