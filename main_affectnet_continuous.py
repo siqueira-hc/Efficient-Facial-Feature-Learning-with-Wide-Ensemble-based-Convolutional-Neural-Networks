@@ -304,7 +304,7 @@ def plot(his_loss, his_val_loss_valence, his_val_loss_arousal, branch_idx, base_
 def main():
     # Experimental variables
     base_path_experiment = "./experiments/AffectNet_Continuous/"
-    name_experiment = "ESR_9-AffectNet_Continuous_debug_100epochs"
+    name_experiment = "ESR_9-AffectNet_Continuous_debug_2epochs"
     base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
