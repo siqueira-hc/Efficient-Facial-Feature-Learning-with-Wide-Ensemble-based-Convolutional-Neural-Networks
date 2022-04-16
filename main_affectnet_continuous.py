@@ -90,7 +90,7 @@ class Branch(nn.Module):
         x_branch = x_branch.view(-1, 512)
         x_branch = self.fc(x_branch)
 
-        x_branch = F.relu(x_branch)  # I added this, because we have it in esr_9, and also in paper but not here!
+        x_branch = F.tanh(x_branch)  # I added this, because we have it in esr_9, and also in paper but not here!
         x_branch = self.fc_dimensional(x_branch)
 
         return x_branch
@@ -308,7 +308,7 @@ def main():
     base_path_to_dataset = "../FER_data/AffectNet"
     num_branches_trained_network = 9
     validation_interval = 1
-    max_training_epoch = 20  # it was 2
+    max_training_epoch = 2  # it was 2
     current_branch_on_training = 8  # it starts from branch 8 (last branch) and trains all the branches step by step
 
     # Make dir
