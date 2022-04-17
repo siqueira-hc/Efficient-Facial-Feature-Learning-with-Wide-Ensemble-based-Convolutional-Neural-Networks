@@ -49,6 +49,7 @@ _ESR_9 = None
 # Saliency map generation: Grad-CAM
 _GRAD_CAM = None
 
+
 # Public methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def detect_face(image, face_detection_method=_ID_FACE_DETECTOR_DLIB):

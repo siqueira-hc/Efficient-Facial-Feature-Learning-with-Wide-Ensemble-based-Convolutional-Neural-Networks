@@ -381,7 +381,7 @@ def main():
             batch = 0
             for inputs, labels in train_loader:
                 batch += 1
-
+                print('input shape', inputs.shape)
                 # Get the inputs
                 inputs, labels = inputs.to(device), labels.to(device)
                 labels_valence = labels[:, 0].view(len(labels[:, 0]), 1)
