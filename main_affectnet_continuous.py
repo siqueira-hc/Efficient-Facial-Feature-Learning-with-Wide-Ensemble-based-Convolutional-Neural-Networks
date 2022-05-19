@@ -381,7 +381,6 @@ def main():
             batch = 0
             for inputs, labels in train_loader:
                 batch += 1
-                print('input shape', inputs.shape)
                 # Get the inputs
                 inputs, labels = inputs.to(device), labels.to(device)
                 labels_valence = labels[:, 0].view(len(labels[:, 0]), 1)
@@ -462,7 +461,7 @@ def main():
         # Change branch on training
         if current_branch_on_training > 0:
             # Decrease max epoch
-            # max_training_epoch = 2  # I commented out
+            max_training_epoch = 2  # I commented out
 
             # Reload best configuration
             net.reload(best_ensemble)

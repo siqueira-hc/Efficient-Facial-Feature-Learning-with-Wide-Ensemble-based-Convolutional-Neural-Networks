@@ -457,7 +457,7 @@ class FERDemo:
         cv2.imshow(self._window_name, self._screen)
 
     def is_running(self):
-        return (cv2.waitKey(1) != 27) and (cv2.getWindowProperty(self._window_name, cv2.WND_PROP_VISIBLE) >= 1)
+        return (cv2.waitKey(1) != 27) #or (cv2.getWindowProperty(self._window_name, cv2.WND_PROP_VISIBLE) >= 1)  # I changed and to or  (the second term does not work on my laptop)
 
     def quit(self):
         cv2.destroyWindow(self._window_name)

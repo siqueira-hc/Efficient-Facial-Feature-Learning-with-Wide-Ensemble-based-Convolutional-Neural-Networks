@@ -204,7 +204,7 @@ def main():
     parser.add_argument("-w", "--webcam_id",
                         help="define the webcam by 'id' to capture images in the webcam mode." +
                              "If none is selected, the default camera by the OS is used.",
-                        type=int, default=-1)
+                        type=int, default=0)
     parser.add_argument("-f", "--frames", help="define frames of videos and webcam captures.",
                         type=int, default=5)
     parser.add_argument("-b", "--branch", help="show individual branch's classification if set true, otherwise," +

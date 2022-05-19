@@ -764,4 +764,4 @@ def pre_process_affect_net(base_path_to_images, base_path_to_annotations, base_d
 #base_path_to_annotations = '/mnt/archive/common/datasets/facial_datasets/AffectNet/Manually_Annotated_file_lists'
 #base_destination_path = '/mnt/archive/common/datasets/facial_datasets/AffectNet/preprocessed'
 #pre_process_affect_net(base_path_to_images=base_path_to_images, base_path_to_annotations=base_path_to_annotations,
- #                      base_destination_path=base_destination_path, set_index=1)
+#                      base_destination_path=base_destination_path, set_index=1)
