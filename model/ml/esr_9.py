@@ -28,6 +28,9 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 
+from wrapyfi.connect.wrapper import MiddlewareCommunicator, DEFAULT_COMMUNICATOR
+from wrapyfi.config.manager import ConfigManager
+
 
 class Base(nn.Module):
     """
@@ -166,7 +169,7 @@ class ConvolutionalBranch(nn.Module):
         return x_to_output_layer
 
 
-class ESR(nn.Module):
+class ESR(MiddlewareCommunicator, nn.Module):
     """
     ESR is the unified ensemble architecture composed of two building blocks the Base and ConvolutionalBranch
     classes as described below by Siqueira et al. (2020):
@@ -193,29 +196,147 @@ class ESR(nn.Module):
 
         :param device: Device to load ESR-9: GPU or CPU.
         """
-
-        super(ESR, self).__init__()
+        MiddlewareCommunicator.__init__(self)
+        nn.Module.__init__(self)
 
         # Base of ESR-9 as described in the docstring (see mark 1)
-        self.base = Base()
-        self.base.load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
-                                                       ESR.FILE_NAME_BASE_NETWORK),
-                                             map_location=device))
-        self.base.to(device)
+        self.device = device
+        self.base = None
+        self.create_base(device)
 
         # Load 9 convolutional branches that composes ESR-9 as described in the docstring (see mark 2)
-        self.convolutional_branches = []
-        for i in range(1, len(self) + 1):
-            self.convolutional_branches.append(ConvolutionalBranch())
-            self.convolutional_branches[-1].load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
-                                                                                 ESR.FILE_NAME_CONV_BRANCH.format(i)),
-                                                                       map_location=device))
-            self.convolutional_branches[-1].to(device)
+        self.convolutional_branches = {}
+        for branch_idx in range(1, len(self) + 1):
+            getattr(self, f"create_branch_{branch_idx}")(device)
 
         self.to(device)
 
         # Evaluation mode on
         self.eval()
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_base",
+                                     should_wait=True)
+    def create_base(self, device):
+        """
+        Creates the base of the network.
+        """
+        self.base = Base()
+        self.base.load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
+                                                       ESR.FILE_NAME_BASE_NETWORK),
+                                             map_location=device))
+        self.base.to(self.device)
+        return True,
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_base",
+                                     carrier="", should_wait=True,
+                                     listener_kwargs=dict(load_torch_device='$device'))
+    def forward_base(self, x, device=None):
+        return self.base(x),
+
+    def _create_branch(self, device, branch_idx):
+        """
+        Creates convolutional branches that composes ESR-9.
+
+        :param device: Device to load ESR-9: GPU or CPU.
+        :return: 1 of 9 convolutional branches that composes ESR-9
+        """
+
+        self.convolutional_branches[branch_idx] = ConvolutionalBranch()
+        self.convolutional_branches[branch_idx].load_state_dict(torch.load(path.join(ESR.PATH_TO_SAVED_NETWORK,
+                                                                            ESR.FILE_NAME_CONV_BRANCH.format(branch_idx)),
+                                                                  map_location=device))
+        self.convolutional_branches[branch_idx].to(device)
+        return branch_idx
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_1",
+                                     should_wait=True)
+    def create_branch_1(self, device):
+        return self._create_branch(device, 1),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_1",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_1(self, x_shared_representations, device=None):
+        return self.convolutional_branches[1](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_2",
+                                     should_wait=True)
+    def create_branch_2(self, device):
+        return self._create_branch(device, 2),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_2",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_2(self, x_shared_representations, device=None):
+        return self.convolutional_branches[2](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_3",
+                                     should_wait=True)
+    def create_branch_3(self, device):
+        return self._create_branch(device, 3),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_3",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_3(self, x_shared_representations, device=None):
+        return self.convolutional_branches[3](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_4",
+                                     should_wait=True)
+    def create_branch_4(self, device):
+        return self._create_branch(device, 4),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_4",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_4(self, x_shared_representations, device=None):
+        return self.convolutional_branches[4](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_5",
+                                     should_wait=True)
+    def create_branch_5(self, device):
+        return self._create_branch(device, 5),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_5",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_5(self, x_shared_representations, device=None):
+        return self.convolutional_branches[5](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_6",
+                                     should_wait=True)
+    def create_branch_6(self, device):
+        return self._create_branch(device, 6),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_6",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_6(self, x_shared_representations, device=None):
+        return self.convolutional_branches[6](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_7",
+                                     should_wait=True)
+    def create_branch_7(self, device):
+        return self._create_branch(device, 7),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_7",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_7(self, x_shared_representations, device=None):
+        return self.convolutional_branches[7](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_8",
+                                     should_wait=True)
+    def create_branch_8(self, device):
+        return self._create_branch(device, 8),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_8",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_8(self, x_shared_representations, device=None):
+        return self.convolutional_branches[8](x_shared_representations),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/created_branch_9",
+                                     should_wait=True)
+    def create_branch_9(self, device):
+        return self._create_branch(device, 9),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "ESR", "/esr9/forward_branch_9",
+                                     should_wait=True, listener_kwargs=dict(load_torch_device='$device'))
+    def forward_branch_9(self, x_shared_representations, device=None):
+        return self.convolutional_branches[9](x_shared_representations),
 
     def forward(self, x):
         """
@@ -230,11 +351,12 @@ class ESR(nn.Module):
         affect_values = []
 
         # Get shared representations
-        x_shared_representations = self.base(x)
+        x_shared_representations, = self.forward_base(x, device=self.device)
 
         # Add to the lists of predictions outputs from each convolutional branch in the ensemble
-        for branch in self.convolutional_branches:
-            output_emotion, output_affect = branch(x_shared_representations)
+        for branch_idx in range(1, len(self)+1):
+            (output_emotion, output_affect), = getattr(self, f"forward_branch_{branch_idx}")\
+                (x_shared_representations, device=self.device)  # branch(x_shared_representations)
             emotions.append(output_emotion)
             affect_values.append(output_affect)
 

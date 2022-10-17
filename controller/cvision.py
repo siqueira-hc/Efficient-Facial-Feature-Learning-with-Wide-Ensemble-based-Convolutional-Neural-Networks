@@ -19,10 +19,10 @@ import cv2
 import dlib
 
 # Modules
-from model.ml.fer import FER
-from model.utils import uimage, udata
-from model.ml.esr_9 import ESR
-from model.ml.grad_cam import GradCAM
+from model.ml import fer
+from model.utils import udata, uimage
+from model.ml import esr_9
+from model.ml import grad_cam
 
 
 # Haar cascade parameters
@@ -107,7 +107,7 @@ def recognize_facial_expression(image, on_gpu, face_detection_method, grad_cam):
     face_coordinates = detect_face(image, face_detection_method)
 
     if face_coordinates is None:
-        to_return_fer = FER(image)
+        to_return_fer = fer.FER(image)
     else:
         face = image[face_coordinates[0][1]:face_coordinates[1][1], face_coordinates[0][0]:face_coordinates[1][0], :]
 
@@ -127,7 +127,7 @@ def recognize_facial_expression(image, on_gpu, face_detection_method, grad_cam):
             saliency_maps = _generate_saliency_maps(input_face, emotion_idx, device)
 
         # Initialize GUI object
-        to_return_fer = FER(image, face, face_coordinates, emotion, affect, saliency_maps)
+        to_return_fer = fer.FER(image, face, face_coordinates, emotion, affect, saliency_maps)
 
     return to_return_fer
 
@@ -202,10 +202,10 @@ def _pre_process_input_image(image):
     :return: (ndarray) image
     """
 
-    image = uimage.resize(image, ESR.INPUT_IMAGE_SIZE)
+    image = uimage.resize(image, esr_9.ESR.INPUT_IMAGE_SIZE)
     image = Image.fromarray(image)
-    image = transforms.Normalize(mean=ESR.INPUT_IMAGE_NORMALIZATION_MEAN,
-                                 std=ESR.INPUT_IMAGE_NORMALIZATION_STD)(transforms.ToTensor()(image)).unsqueeze(0)
+    image = transforms.Normalize(mean=esr_9.ESR.INPUT_IMAGE_NORMALIZATION_MEAN,
+                                 std=esr_9.ESR.INPUT_IMAGE_NORMALIZATION_STD)(transforms.ToTensor()(image)).unsqueeze(0)
 
     return image
 
@@ -222,7 +222,7 @@ def _predict(input_face, device):
     global _ESR_9
 
     if _ESR_9 is None:
-        _ESR_9 = ESR(device)
+        _ESR_9 = esr_9.ESR(device)
 
     to_return_emotion = []
     to_return_emotion_idx = []
@@ -277,7 +277,7 @@ def _generate_saliency_maps(input_face, emotion_outputs, device):
     global _GRAD_CAM, _ESR_9
 
     if _GRAD_CAM is None:
-        _GRAD_CAM = GradCAM(_ESR_9, device)
+        _GRAD_CAM = grad_cam.GradCAM(_ESR_9, device)
 
     # Generate saliency map
     return _GRAD_CAM.grad_cam(input_face, emotion_outputs)

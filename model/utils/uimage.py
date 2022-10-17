@@ -18,94 +18,99 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-# Private variables
-_MAX_FPS = 30
-_FPS = 5
-_CAP = None
+from wrapyfi.connect.wrapper import MiddlewareCommunicator, DEFAULT_COMMUNICATOR
 
 
 # Image I/O >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+class CVVideo(MiddlewareCommunicator):
+    CAP_PROP_FRAME_WIDTH = 640
+    CAP_PROP_FRAME_HEIGHT = 480
 
-def set_fps(fps):
-    global _FPS
-    _FPS = fps
+    def __init__(self, fps=20, max_fps=30, cap=None):
+        super().__init__()
+        self.max_fps = max_fps
+        self.fps = fps
+        self.cap = cap
 
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "CVVideo", "/esr9/cam_fps", should_wait=True)
+    def set_fps(self, fps):
+        self.fps = fps
+        return fps,
 
-def is_video_capture_open():
-    global _CAP
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "CVVideo", "/esr9/cam_chk", should_wait=True)
+    def is_video_capture_open(self):
+        if self.cap is None:
+            return False,
+        else:
+            return self.cap.isOpened(),
 
-    if _CAP is None:
-        return False
-    else:
-        return _CAP.isOpened()
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "CVVideo", "/esr9/cam_ini", should_wait=True)
+    def initialize_video_capture(self, source, img_width=CAP_PROP_FRAME_WIDTH, img_height=CAP_PROP_FRAME_HEIGHT):
 
+        # If cap is not none, it re-initialize video capture with the new video file
+        if not (self.cap is None):
+            self.cap.release()
+            self.cap = None
 
-def initialize_video_capture(source):
-    global _CAP
-
-    # If cap is not none, it re-initialize video capture with the new video file
-    if not (_CAP is None):
-        _CAP.release()
-        _CAP = None
-
-    # Read the file
-    try:
-        _CAP = cv2.VideoCapture(source)
-    except Exception as e:
-        _CAP = None
-        print("Error on trying to read the following file as video: {}".format(source))
-        print("Please, check if the file exists, is an image and is not corrupted.")
-        print("Supported file format: MPEG-4 (*.mp4).")
-        print("Check whether working versions of ffmpeg or gstreamer is installed.")
-        raise e
-
-    return not (_CAP is None)
-
-
-def release_video_capture():
-    global _CAP
-
-    try:
-        _CAP.release()
-    except Exception as e:
-        print(e)
-    finally:
-        _CAP = None
-
-    return _CAP is None
-
-
-def get_frame():
-    """
-    Get a frame from a video file.
-
-    :return: (ndarray, float) (Loaded frame, time in seconds).
-    """
-    global _CAP, _FPS
-
-    to_return_frame = None
-
-    if _CAP is None:
-        print("Error on getting frame. cv2.VideoCapture is not initialized.")
-    else:
+        # Read the file
         try:
-            if _CAP.isOpened():
-                # Skip frames
-                for i in range(int(_MAX_FPS / _FPS)):
-                    _CAP.grab()
-
-                is_valid_frame, to_return_frame = _CAP.retrieve()
-
-                if not is_valid_frame:
-                    to_return_frame = None
+            self.cap = cv2.VideoCapture(source)
+            if img_width > 0 and img_height > 0:
+                self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, img_width)
+                self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, img_height)
         except Exception as e:
-            print("Error on getting a frame. Please, double-check if the video file is not corrupted.")
+            self.cap = None
+            print("Error on trying to read the following file as video: {}".format(source))
+            print("Please, check if the file exists, is an image and is not corrupted.")
             print("Supported file format: MPEG-4 (*.mp4).")
             print("Check whether working versions of ffmpeg or gstreamer is installed.")
             raise e
 
-    return to_return_frame, (_CAP.get(cv2.CAP_PROP_POS_MSEC) / 1000)
+        return not (self.cap is None),
+
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "CVVideo", "/esr9/cam_cls", should_wait=True)
+    def release_video_capture(self):
+        try:
+            self.cap.release()
+        except Exception as e:
+            print(e)
+        finally:
+            self.cap = None
+
+        return self.cap is None,
+
+    @MiddlewareCommunicator.register("Image", DEFAULT_COMMUNICATOR, "CVVideo", "/esr9/cam_feed",
+                                     width="$img_width", height="$img_height", rgb=True, queue_size=10)
+    @MiddlewareCommunicator.register("NativeObject", DEFAULT_COMMUNICATOR, "CVVideo", "/esr9/cam_sec", should_wait=True)
+    def get_frame(self, img_width=CAP_PROP_FRAME_WIDTH, img_height=CAP_PROP_FRAME_HEIGHT):
+        """
+        Get a frame from a video file.
+
+        :return: (ndarray, float) (Loaded frame, time in seconds).
+        """
+
+        to_return_frame = None
+
+        if self.cap is None:
+            print("Error on getting frame. cv2.VideoCapture is not initialized.")
+        else:
+            try:
+                if self.cap.isOpened():
+                    # Skip frames
+                    for i in range(int(self.max_fps / self.fps)):
+                        self.cap.grab()
+
+                    is_valid_frame, to_return_frame = self.cap.retrieve()
+
+                    if not is_valid_frame:
+                        to_return_frame = None
+            except Exception as e:
+                print("Error on getting a frame. Please, double-check if the video file is not corrupted.")
+                print("Supported file format: MPEG-4 (*.mp4).")
+                print("Check whether working versions of ffmpeg or gstreamer is installed.")
+                raise e
+
+        return to_return_frame, (self.cap.get(cv2.CAP_PROP_POS_MSEC) / 1000)
 
 
 def read(path_to_image, convert_to_grey_scale=False):
@@ -142,7 +147,6 @@ def read(path_to_image, convert_to_grey_scale=False):
 
     return loaded_image
 
-
 def write(image, file_path, file_name):
     full_path = os.path.join(file_path, file_name)
 
@@ -161,30 +165,24 @@ def write(image, file_path, file_name):
 def convert_grey_to_bgr(image):
     return cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
 
-
 def convert_bgr_to_grey(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
 
 def convert_bgr_to_rgb(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-
 def convert_rgb_to_grey(image):
     return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-
 
 def convert_rgb_to_bgr(image):
     return cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
 # Color conversion methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
 # Drawing methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def draw_rectangle(image, initial_coordinates, final_coordinates, color=(0, 255, 0), thickness=2):
     cv2.rectangle(image, initial_coordinates, final_coordinates, color, thickness)
-
 
 def draw_horizontal_bar(image, val, max, initial_coordinates, final_coordinates, thickness, color=(0, 255, 0)):
     x_length = final_coordinates[0] - initial_coordinates[0]
@@ -192,7 +190,6 @@ def draw_horizontal_bar(image, val, max, initial_coordinates, final_coordinates,
 
     cv2.rectangle(image, initial_coordinates, final_coordinates, color, thickness)
     cv2.rectangle(image, initial_coordinates, value_coordinates, color, cv2.FILLED)
-
 
 def draw_graph(image, x, y, initial_coordinates, samples, text_x, text_y, color_x, color_y, thickness, offset, font_size, grid_color, size):
     # Params
@@ -250,25 +247,25 @@ def draw_graph(image, x, y, initial_coordinates, samples, text_x, text_y, color_
     # Draw to image
     image[initial_coordinates[0]:initial_coordinates[0] + data.shape[0], initial_coordinates[1]:initial_coordinates[1] + data.shape[1], :] = data[:]
 
-
 def draw_text(image, text, initial_coordinates, color=(0, 255, 0), scale=1, thickness=1):
-    cv2.putText(image, text, (int(initial_coordinates[0]), int(initial_coordinates[1])), cv2.FONT_HERSHEY_COMPLEX, fontScale=scale, color=color, thickness=thickness)
-
+    cv2.putText(image, text, (int(initial_coordinates[0]), int(initial_coordinates[1])), cv2.FONT_HERSHEY_COMPLEX,
+                fontScale=scale, color=color, thickness=thickness)
 
 def draw_image(image, image_to_draw, initial_coordinates):
     image[int(initial_coordinates[0]):int(initial_coordinates[0]) + image_to_draw.shape[0], int(initial_coordinates[1]):int(initial_coordinates[1]) + image_to_draw.shape[1], :] = image_to_draw
 
 # Drawing methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
 # Transformation methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def resize(image, output_size=None, f=None):
-    if f is None:
-        return cv2.resize(image, output_size)
-    else:
-        return cv2.resize(image, output_size, fx=f, fy=f)
-
+    try:
+        if f is None:
+            return cv2.resize(image, output_size)
+        else:
+            return cv2.resize(image, output_size, fx=f, fy=f)
+    except cv2.Error:
+        return image
 
 def crop_rectangle(image, initial_coordinates, final_coordinates, channels_last=True):
     if channels_last:
@@ -278,12 +275,10 @@ def crop_rectangle(image, initial_coordinates, final_coordinates, channels_last=
 
 # Transformation methods <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
 # Other methods >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 def blur(image, kernel_size):
     return cv2.blur(image, (kernel_size, kernel_size))
-
 
 def superimpose(img_1, img_2, w_1=0.35, w_2=0.65, gamma=0):
     # Convert tensor to numpy, resize to the input size, cast to uint8, and superimpose img_1 on img_2

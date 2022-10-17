@@ -25,8 +25,10 @@ from argparse import RawTextHelpFormatter
 import time
 
 # Modules
+from wrapyfi.config.manager import ConfigManager
 from controller import cvalidation, cvision
-from model.utils import uimage, ufile
+from model.utils import ufile
+from model.utils import uimage
 from model.screen.fer_demo import FERDemo
 
 
@@ -36,16 +38,17 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
     facial expressions of the closets face in a frame-based approach.
     """
 
+    cvvideo = uimage.CVVideo()
     fer_demo = None
     write_to_file = not (output_csv_file is None)
     starting_time = time.time()
 
-    if not uimage.initialize_video_capture(camera_id):
+    if not cvvideo.initialize_video_capture(camera_id)[0]:
         raise RuntimeError("Error on initializing video capture." +
                            "\nCheck whether a webcam is working or not." +
                            "In linux, you can use Cheese for testing.")
 
-    uimage.set_fps(frames)
+    cvvideo.set_fps(frames)
 
     # Initialize screen
     if display:
@@ -60,9 +63,9 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
             ufile.create_file(output_csv_file, str(time.time()))
 
         # Loop to process each frame from a VideoCapture object.
-        while uimage.is_video_capture_open() and ((not display) or (display and fer_demo.is_running())):
+        while cvvideo.is_video_capture_open()[0] and ((not display) or (display and fer_demo.is_running())):
             # Get a frame
-            img, _ = uimage.get_frame()
+            img, _ = cvvideo.get_frame()
 
             fer = None if (img is None) else cvision.recognize_facial_expression(img, device, face_detection, gradcam)
 
@@ -81,7 +84,7 @@ def webcam(camera_id, display, gradcam, output_csv_file, screen_size, device, fr
     except KeyboardInterrupt as qe:
         print("Keyboard interrupt event raised.")
     finally:
-        uimage.release_video_capture()
+        cvvideo.release_video_capture()
 
         if display:
             fer_demo.quit()
@@ -124,15 +127,16 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size,
     facial expressions of the closets face in a frame-based approach.
     """
 
+    cvvideo = uimage.CVVideo()
     fer_demo = None
     write_to_file = not (output_csv_file is None)
 
-    if not uimage.initialize_video_capture(input_video_path):
+    if not cvvideo.initialize_video_capture(input_video_path)[0]:
         raise RuntimeError("Error on initializing video capture." +
                            "\nCheck whether working versions of ffmpeg or gstreamer is installed." +
                            "\nSupported file format: MPEG-4 (*.mp4).")
 
-    uimage.set_fps(frames)
+    cvvideo.set_fps(frames)
 
     # Initialize screen
     if display:
@@ -145,9 +149,9 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size,
             ufile.create_file(output_csv_file, input_video_path)
 
         # Loop to process each frame from a VideoCapture object.
-        while uimage.is_video_capture_open() and ((not display) or (display and fer_demo.is_running())):
+        while cvvideo.is_video_capture_open()[0] and ((not display) or (display and fer_demo.is_running())):
             # Get a frame
-            img, timestamp = uimage.get_frame()
+            img, timestamp = cvvideo.get_frame()
 
             # Video has been processed
             if img is None:
@@ -171,7 +175,7 @@ def video(input_video_path, display, gradcam, output_csv_file, screen_size,
         print("Error raised during video mode.")
         raise e
     finally:
-        uimage.release_video_capture()
+        cvvideo.release_video_capture()
 
         if display:
             fer_demo.quit()
@@ -185,6 +189,7 @@ def main():
     parser = argparse.ArgumentParser(description='test', formatter_class=RawTextHelpFormatter)
     parser.add_argument("mode", help="select a method among 'image', 'video' or 'webcam' to run ESR-9.",
                         type=str, choices=["image", "video", "webcam"])
+    parser.add_argument("--wrapyfi_cfg", help="select file to load Wrapyfi configs for running instance.", type=str)
     parser.add_argument("-d", "--display", help="display the output of ESR-9.",
                         action="store_true")
     parser.add_argument("-g", "--gradcam", help="run grad-CAM and displays the salience maps.",
@@ -223,6 +228,10 @@ def main():
                         type=int, choices=[1, 2, 3], default=1)
 
     args = parser.parse_args()
+
+    if args.wrapyfi_cfg:
+        print("Wrapyfi config loading from ", args.wrapyfi_cfg)
+        ConfigManager(args.wrapyfi_cfg)
 
     # Calls to main methods
     if args.mode == "image":
